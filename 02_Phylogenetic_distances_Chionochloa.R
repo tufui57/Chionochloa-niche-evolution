@@ -1,3 +1,7 @@
+###################################################################
+### Phylogenetic distances between all combinations of species
+###################################################################
+
 acaena <- read.nexus("Y:\\Niche change of lineages\\Phylogenetic data and trees\\Chionochloa_genetic_data\\Chiono_summary.trees")
 
 
@@ -6,8 +10,6 @@ acaena <- read.nexus("Y:\\Niche change of lineages\\Phylogenetic data and trees\
 tips <- acaena$tip.label
 ## first get the node numbers of the tips
 nodes <- sapply(tips, function(x,y) which(y==x), y=acaena$tip.label)
-## then get the edge lengths for those nodes
-#edge.lengths<-setNames(acaena$edge.length[sapply(nodes, function(x,y) which(y==x),y=acaena$edge[,2])],names(nodes))
 
 ## Distance between all combinations of tips
 distances <- dist.nodes(acaena)
