@@ -1,6 +1,7 @@
 #########################################################################################################
 ### Tests for phylogenetic distances, species ages, niche volume and Schoener's D
 #########################################################################################################
+
 setwd("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands")
 
 ###################################################################
@@ -45,51 +46,17 @@ library(ggplot2)
 
 dmat <- read.csv("Chionochloa\\ShonnerD_phylogenetic_distances_Chionochloa2018.csv")
 
-plotAnalysis <- function(data, 
-                         m, # linear model object
-                         xv, yv, # column names of responce and explanatory variable
-                         xlabname, ylabname, # axes names for plot
-                         showStats = T # TRUE; Show p value and slope of linear model and colour points, FALSE; No stat values and black points
-){
-  
-  if(showStats == T){
-    myplot <- ggplot(data, aes_string(x = xv, y = yv, colour = "spname1")) +
-      geom_point(aes(colour = spname1)) +
-      # change xy labels
-      labs(x = xlabname, y = ylabname) +
-      # change text size
-      theme(text = element_text(size = 20),
-            axis.text.x = element_text(size = 20)) +
-      # drow LM line & confident intervals 
-      stat_smooth(method = "lm", col = "red") +
-      # show stats result as title
-      labs(title = paste("Adj R2 =", signif(summary(m)$adj.r.squared, digits = 2),
-                         "Intercept =", signif(m$coef[[1]], 2),
-                         " Slope =", signif(m$coef[[2]], 2),
-                         " P =", signif(summary(m)$coef[2, 4], 2))) +
-      theme(panel.background = element_rect(fill = "gray95"))
-  } else {
-    myplot <- ggplot(data, aes_string(x = xv, y = yv)) +
-      geom_point(aes(colour = spname1)) +
-      # change xy labels
-      labs(x = xlabname, y = ylabname) +
-      # change text size
-      theme(text = element_text(size = 20),
-            axis.text.x = element_text(size = 20)) +
-      # drow LM line & confident intervals 
-      stat_smooth(method = "lm", col = "red") +
-      theme(panel.background = element_rect(fill = "gray95"), legend.position="none")
-  }
-  return(myplot)
-}
+source("C:\\Users\\nomur\\Documents\\Acaena niche evolution\\plotAnalysis_clade_niche.R")
 
 #########################################################################
 ### Phylogenetic distances ~ niche overlap of occurrence records
 #########################################################################
 
-m <- lm(pd~ecospat.corrected, dmat)
+m <- lm(pd ~ ecospat.corrected, dmat)
 
-myplot <- plotAnalysis(data=dmat, m=m, xv = "ecospat.corrected", yv = "pd", showStats = F,
+myplot <- plotAnalysis(data = dmat, m = m,
+                       xv = "ecospat.corrected", yv = "pd", 
+                       showStats = F, nodeNumber = NULL,
                        xlabname = "Schonner's D of occurrence records", ylabname = "Phylogenetic distances")
 
 # save

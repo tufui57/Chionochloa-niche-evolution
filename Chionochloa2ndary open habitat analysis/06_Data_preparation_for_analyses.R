@@ -6,8 +6,7 @@
 ##
 ############################################################################################################
 
-library(ggplot2)
-library(devtools)
+library(dplyr)
 source("Y://R scripts//Scripts for Practice and ones written by someone else//cbind_fill.r")
 
 ########################################################
@@ -15,19 +14,22 @@ source("Y://R scripts//Scripts for Practice and ones written by someone else//cb
 ########################################################
 
 ### Summary of pre-human land cover for each sp
-da1 <- read.csv("Y:\\Chionochloa_bioclim_landcover_history_inclNAonland.csv")
-d <- da1[is.na(da1$landCoverChange) == F, ]
+dat <- read.csv("Y:\\Chionochloa_bioclim_landcover_history_inclNAonland.csv")
+dat <- dat[is.na(dat$landCoverChange) == F, ]
+
 # sp names
-sname <- colnames(d)[grepl("^Chion", colnames(d))]
-# C. and C. have no occurrence in primary and/or secondary habitats.
-s <- sname[ - c(17, 21)]
+spname <- grepl("^Chion", colnames(dat)) %>% colnames(dat)[.]
+# C. flavicans f. temata, C. nivifera have no occurrence in primary and/or secondary habitats.
+spname <- spname[ - c(17, 21)]
 
 ### Make summary tables of land cover for each species occurrences
-r<-list()
-for(i in s){
-  spcol <- colnames(d)[(colnames(d) %in% sname)==F]
+
+r <- list()
+
+for(i in spname){
+  spcol <- colnames(d)[(colnames(dat) %in% spname)==F]
   
-  sd <- d[is.na(d[,i])==F, spcol]
+  sd <- dat[is.na(dat[,i]) == F, spcol]
   # Table of c(number of occurrences in pre-human landcover, current landcover, unfeasible land cover change)
   prel <- c(nrow(sd), sum(sd[, "preLandcover"] == 1 & sd[, "currentLandcover"] == 4), table(sd[, "preLandcover"]))
   
@@ -48,23 +50,24 @@ for(i in s){
 
 # Fill NA columns
 spsum <- cbind.fill(r)
-colnames(spsum)<-s
+colnames(spsum) <- spname
 rownames(spsum)[5:8] <- c("current-NF", "current-exoticForest","current-nonF", "current-nonPotential")
 
 # Table of Land cover change history
 landcover <- lapply(s, function(i){
-  spcol <- colnames(d)[(colnames(d) %in% sname)==F]
-  sd <- d[is.na(d[,i])==F, spcol]
+  spcol <- colnames(dat)[(colnames(dat) %in% spname)==F]
+  sd <- dat[is.na(dat[,i]) == F, spcol]
   c(nrow(sd), table(sd$landCoverChange))
 })
+
 landcover2 <- cbind.fill(landcover)
-colnames(landcover2) <- s
+colnames(landcover2) <- spname
 rownames(landcover2)[1] <- "Occurrence1kmCells"
 
 write.csv(t(landcover2),"Y://Chionochloa_landscapeChangeHistory.csv")
 
 ########################################################
-### Calclation of indices
+### Calclation of indices for analysis
 ########################################################
 
 # Land cover change data
@@ -75,7 +78,7 @@ ages <- read.csv("Y:\\Niche change of lineages\\Niche evolution of open habitat 
 vol <- read.csv("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Chionochloa\\Chionochloa_nicheVolume.csv")
 
 # Modify species name of species age dataframe
-a<- gsub("subsp", "subsp.", ages$X)
+a <- gsub("subsp", "subsp.", ages$X)
 # Chionochloa flaviscans in phylogeny tree and Chionochloa flaviscans f. flaviscans in occurrence records are treated as the same species?
 ages$X <- gsub("Chionochloa_flavicans", "Chionochloa_flavicans_f._flavicans", gsub("var", "var.", a))
 
