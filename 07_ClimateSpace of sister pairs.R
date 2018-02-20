@@ -83,14 +83,20 @@ cladedata <- lapply(number, function(i){
   
   return(clades)
   }
-  
-  )
-
-
+)
 
 save(cladedata, file = ".//cladePairData_chion.data")
 
-for(i in 1:length(cladedata)){
+load(".//cladePairData_chion.data")
+
+# Rrmove duplicated clade pairs
+spPairs <- sapply(1:length(cladedata), function(i){
+   strsplit(cladedata[[i]][[5]]," ")[[1]] %>% as.numeric %>% sort
+  }
+)
+targetnodes <- spPairs[1, duplicated(spPairs[1,])]
+
+for(i in targetnodes){
   
   clades <- cladedata[[i]]
   
@@ -100,9 +106,10 @@ for(i in 1:length(cladedata)){
                          col1 = "green", col2 = "purple",
                          nodeName = clades[[2]],
                          sisnodeName = clades[[4]],
-                         nodeNumber = i,
+                         nodeNumber = strsplit(clades[[5]]," ")[[1]][1],
                          extent_x, extent_y,
                          save = TRUE
   )
 }
+
 

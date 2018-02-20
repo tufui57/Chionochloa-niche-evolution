@@ -18,7 +18,6 @@ nodes <- data.frame(sapply(tips, function(x,y) which(y == x), y = chion$tip.labe
 colnames(nodes) <- "nodelabel"
 
 # Modify names
-scores[, grepl("Chion", colnames(scores))] %>% colSums
 rownames(nodes) <- gsub("subsp", "subsp.", rownames(nodes)) %>% 
   gsub("Chionochloa_flavicans", "Chionochloa_flavicans_f._flavicans", .) %>% 
   gsub("Chionochloa_rubra_subsp._rubra", "Chionochloa_rubra_var._rubra", .) %>% 
