@@ -113,9 +113,9 @@ ancsisOverlapPd <- rbind(
 dup <- duplicated(ancsisOverlapPd$ecospat.corrected) %>% which
 ancsisOverlapPd <- ancsisOverlapPd[-dup, ]
 
-m <- lm(distance ~ ecospat.corrected, sisOverlapPd)
+m <- lm(distance ~ ecospat.corrected, ancsisOverlapPd)
 
-myplot <- plotAnalysis(data = sisOverlapPd, 
+myplot <- plotAnalysis(data = ancsisOverlapPd, 
                        m = m, 
                        xv = "ecospat.corrected", yv = "distance", 
                        nodeNumber = "node1", showStats = T,

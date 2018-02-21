@@ -22,27 +22,9 @@ extent_y = c(min(scores$PC2), max(scores$PC2))
 ### Node niche
 ########################################################################################
 
-### Import species name codes
-spname <- grepl("Chion", colnames(scores)) %>% colnames(scores)[.]
-codes <- gsub("Chionochloa_", "", spname) %>% 
-  gsub("subsp._", "", .) %>% 
-  gsub("var._", "", .)
-
-spname <- (codes %>% substring(., 1, last = 3) %>% mutate(as_tibble(spname), tag = .))
-colnames(spname)[1] <- "X"
-subsp <- codes %>% 
-  strsplit(., "_") %>% 
-  lapply(., function(x){
-    ifelse(is.na(x[2]), "", x[2])
-  }) %>% 
-  substring(., 1, last = 3)
-
-spname <- lapply(1:length(subsp), function(i){
-    paste(spname[i,"tag"], subsp[i], sep = "_")
-}
-) %>% unlist %>% 
-  gsub("_$", "", .) %>% 
-  mutate(spname, tag = .) 
+# Make species name tag
+source(".//Chionochloa niche evolution//makeTag.R")
+makeTag(colnames(scores), "Chionochloa")
 
 
 ########################################################################################
@@ -54,10 +36,6 @@ source(".//Acaena niche evolution//plotClimateSpaceWithSpNameList.R")
 
 # Check if one of their species has no occurrence rescords.
 scores[, grepl("Chion", colnames(scores))] %>% colSums
-rownames(nodes) <- gsub("subsp", "subsp.", rownames(nodes)) %>% 
-  gsub("Chionochloa_flavicans", "Chionochloa_flavicans_f._flavicans", .) %>% 
-  gsub("Chionochloa_rubra_subsp._rubra", "Chionochloa_rubra_var._rubra", .) %>% 
-  gsub("var_", "var._", .)
 
 # Check which species are not shared between phylogenetic tree and occurrence record data
 rownames(nodes)[!(rownames(nodes) %in% colnames(scores))]
@@ -84,6 +62,8 @@ cladedata <- lapply(number, function(i){
   return(clades)
   }
 )
+# Name clade data list with their node number
+names(cladedata) <- number
 
 save(cladedata, file = ".//cladePairData_chion.data")
 
@@ -94,11 +74,12 @@ spPairs <- sapply(1:length(cladedata), function(i){
    strsplit(cladedata[[i]][[5]]," ")[[1]] %>% as.numeric %>% sort
   }
 )
+
 targetnodes <- spPairs[1, duplicated(spPairs[1,])]
 
 for(i in targetnodes){
   
-  clades <- cladedata[[i]]
+  clades <- cladedata[[which(names(cladedata) == i)]]
   
   ploTwoGroupWithSpNames(background = scores,
                          axis1 = "PC1", axis2 = "PC2", # Names of coordinates
