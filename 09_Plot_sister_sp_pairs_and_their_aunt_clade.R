@@ -5,7 +5,7 @@
 load(".//Scores_chion.data")
 load(".//cladePairData_chion.data")
 
-setwd(".//Chionochloa niche evolution")
+setwd(".//Chionochloa-niche-evolution")
 
 # tidyverse loads too much DLLs. Load tidyr instead.
 library(tidyr)
@@ -16,7 +16,7 @@ library(gridExtra)
 source("..//Acaena niche evolution//generateClimateDataOfClades.R")
 source("..//Acaena niche evolution//SchonnerDdataframeFormat.r")
 
-source("..//Chionochloa niche evolution//06_Clade_pairing.R")
+source("..//Chionochloa-niche-evolution//06_Clade_pairing.R")
 ### Import species name codes
 
 extent_x = c(min(scores$PC1), max(scores$PC1))
