@@ -1,100 +1,107 @@
-###################################################
-### Clade niche analysis
-###################################################
-
-library(phytools)
-library(ape)
-
-##############################################################################
-### Data preparation
-##############################################################################
+# ###################################################
+# ### Clade niche analysis
+# ###################################################
+# 
+# library(phytools)
+# library(ape)
+# 
+# ##############################################################################
+# ### Data preparation
+# ##############################################################################
 
 genus_name <- "Chionochloa"
 
 source(paste("./", genus_name, " niche evolution//06_Clade_pairing.R", sep = ""))
-source(paste("./", genus_name, " niche evolution//plotAnalysis_clade_niche.R", sep = ""))
+source(paste("./Acaena niche evolution//plotAnalysis_clade_niche.R", sep = ""))
 
-#################################################################################
-### Calculate node ages
-#################################################################################
+# #################################################################################
+# ### Calculate node ages
+# #################################################################################
+# 
+# ### Distance between all combinations of tips
+# distances <- dist.nodes(chion)
+# 
+# # Calculate species ages
+# ages <- sapply(nodes[[1]], function(i){
+#   # Phylogenetic distance list has 0 (distance to themselves)
+#   (distances[,i] > 0) %>% distances[., i] %>% min
+#   }
+# )
+# 
+# ages <- as_tibble(ages) %>% mutate(., spname = row.names(nodes))
+# 
+# ### Calculate internal node ages
+# nodeage <- cbind(rep(NA, length(branching.times(chion))), branching.times(chion))
+# colnames(nodeage) <- c("spname", "value")
+# 
+# 
+# agesTipAndNode <- rbind(ages, nodeage)
+# 
+# 
+# ########################################
+# ###  Dataframe of Clade niche volume & age
+# ########################################
+# 
+# volume <- read.csv(".//clade_nicheVolume_chion.csv")
+# extractAges <- agesTipAndNode[rownames(agesTipAndNode) %in% volume$node1,]
+# 
+# ageVolData <- cbind(extractAges, volume[order(volume$node1), ])
+# 
+# colnames(ageVolData)[c(1,2,4)] <- c("speciesAge", "spname", "nicheVolume")
+# 
+# write.csv(ageVolData[, c("node1", "spname", "nicheVolume", "speciesAge")], "NicheVolume_age_chion.csv")
+# 
+# ###################################################
+# ### Dataframe of Clade niche overlap & phylogenetic distances
+# ###################################################
+# 
+# dis <- data.frame(distance2)
+# overlap <- read.csv(".//clade_schoennerD_chion.csv")
+# 
+# overlapPdData <- cbind(overlap, dis[dis$node %in% overlap$node1, ])[ ,c("node1", "node2", 
+#                                                       "nicheOverlap", "distance")]
+# 
+# colnames(overlapPdData)[3:4] <- c("nicheOverlap", "phyloDistance")
+# 
+# # Species name of node
+# overlapspnames <- (nodes$nodelabel %in% overlapPdData$node1) %>% rownames(nodes)[.]
+# c(overlapspnames, rep(NA, nrow(overlapPdData) - length(overlapspnames)))
+# 
+# overlapPdData <- mutate(overlapPdData, node1name = 
+#          c(overlapspnames, rep(NA, nrow(overlapPdData) - length(overlapspnames)))
+#          )
+# 
+# # Show sister species list
+# for(i in overlapPdData$node1){
+#   print(i)
+#   print(rownames(nodes)[allnodesister[[i]]])
+# }
+#  
+# 
+# write.csv(overlapPdData, "Nicheovrlap_PD_chion.csv")
 
-### Distance between all combinations of tips
-distances <- dist.nodes(chion)
-
-# Calculate species ages
-ages <- sapply(nodes[[1]], function(i){
-  # Phylogenetic distance list has 0 (distance to themselves)
-  (distances[,i] > 0) %>% distances[., i] %>% min
-  }
-)
-
-ages <- as_tibble(ages) %>% mutate(., spname = row.names(nodes))
-
-### Calculate internal node ages
-nodeage <- cbind(rep(NA, length(branching.times(chion))), branching.times(chion))
-colnames(nodeage) <- c("spname", "value")
-
-
-agesTipAndNode <- rbind(ages, nodeage)
-
-
-########################################
-###  Dataframe of Clade niche volume & age
-########################################
-
-volume <- read.csv(".//clade_nicheVolume_chion.csv")
-extractAges <- agesTipAndNode[rownames(agesTipAndNode) %in% volume$node1,]
-
-ageVolData <- cbind(extractAges, volume[order(volume$node1), ])
-
-colnames(ageVolData)[c(1,2,4)] <- c("speciesAge", "spname", "nicheVolume")
-
-write.csv(ageVolData[, c("node1", "spname", "nicheVolume", "speciesAge")], "NicheVolume_age_chion.csv")
-###################################################
-### Dataframe of Clade niche overlap & phylogenetic distances
-###################################################
-
-dis <- data.frame(distance2)
-overlap <- read.csv(".//clade_schoennerD_chion.csv")
-
-overlapPdData <- cbind(overlap, dis[dis$node %in% overlap$node1, ])[ ,c("node1", "node2", 
-                                                      "ecospat.corrected", "distance")]
-
-colnames(overlapPdData)[3:4] <- c("nicheOverlap", "phyloDistance")
-
-# Species name of node
-overlapspnames <- (nodes$nodelabel %in% overlapPdData$node1) %>% rownames(nodes)[.]
-c(overlapspnames, rep(NA, nrow(overlapPdData) - length(overlapspnames)))
-
-overlapPdData <- mutate(overlapPdData, node1name = 
-         c(overlapspnames, rep(NA, nrow(overlapPdData) - length(overlapspnames)))
-         )
-
-# Show sister species list
-for(i in overlapPdData$node1){
-  print(i)
-  print(rownames(nodes)[allnodesister[[i]]])
-}
- 
-
-write.csv(overlapPdData, "Nicheovrlap_PD_chion.csv")
 #########################################################################
 ### Plots
 #########################################################################
+
+library(dplyr)
+
+ageVolData <- read.csv("NicheVolume_age_chion.csv")
+overlapPdData <- read.csv("Nicheovrlap_PD_chion.csv")
 
 #########################################################################
 ### Sister species pairs' Phylogenetic distances ~ niche overlap of occurrence records
 #########################################################################
 
 ### Node numbers of sister species pairs
-sispairs <- c(1,20,3,5,16)
+sispairs <- c(9,29,20,33,15,12,4,6,31,30)
 sisOverlapPd <- (overlapPdData$node1 %in% sispairs) %>% overlapPdData[., ]
 
-m <- lm(distance ~ ecospat.corrected, sisOverlapPd)
+m <- lm(phyloDistance ~ nicheOverlap, sisOverlapPd)
 
 myplot <- plotAnalysis(data = sisOverlapPd, 
                        m = m, 
-                       xv = "ecospat.corrected", yv = "distance", 
+                       xv = "nicheOverlap", yv = "phyloDistance", 
                        nodeNumber = "node1", showStats = T,
                        xlabname = "Niche overlap of occurrence records", ylabname = "Phylogenetic distances between sister species pairs"
 )
@@ -111,7 +118,7 @@ rm(myplot, m)
 #########################################################################
 
 ### Node numbers of sister species pairs
-sispairs <- c(1,20,3,5,16)
+sispairs <- c(9,29,20,33,15,12,4,6,31,30)
 
 ancSisNode <- sapply(sispairs, function(i){
   
@@ -128,14 +135,14 @@ ancsisOverlapPd <- rbind(
   ((overlapPdData$node2 %in% ancSisNode) %>% overlapPdData[., ])
 )
 
-dup <- duplicated(ancsisOverlapPd$ecospat.corrected) %>% which
+dup <- duplicated(ancsisOverlapPd$nicheOverlap) %>% which
 ancsisOverlapPd <- ancsisOverlapPd[-dup, ]
 
-m <- lm(distance ~ ecospat.corrected, sisOverlapPd)
+m <- lm(phyloDistance ~ nicheOverlap, sisOverlapPd)
 
 myplot <- plotAnalysis(data = sisOverlapPd, 
                        m = m, 
-                       xv = "ecospat.corrected", yv = "distance", 
+                       xv = "nicheOverlap", yv = "phyloDistance", 
                        nodeNumber = "node1", showStats = T,
                        xlabname = "Niche overlap of occurrence records", ylabname = "Phylogenetic distances between sister species pairs"
 )
@@ -153,11 +160,11 @@ rm(myplot, m)
 ### Eliminate outlier, SAC, of clade age
 
 overlapPd <- overlapPdData[which(overlapPdData$node1 != 19), ]
-m <- lm(distance ~ ecospat.corrected, overlapPd)
+m <- lm(phyloDistance ~ nicheOverlap, overlapPd)
 
 myplot <- plotAnalysis(data = overlapPd, 
                        m = m, 
-                       xv = "ecospat.corrected", yv = "distance", 
+                       xv = "nicheOverlap", yv = "phyloDistance", 
                        nodeNumber = "node1", showStats = T,
                        xlabname = "Niche overlap of occurrence records", ylabname = "Phylogenetic distances between clades"
                        )
@@ -170,9 +177,9 @@ rm(myplot, m)
 
 
 ### Leave outlier of clade age in data
-m <- lm(distance ~ ecospat.corrected, overlapPdData)
+m <- lm(phyloDistance ~ nicheOverlap, overlapPdData)
 
-myplot <- plotAnalysis(data = overlapPdData, m = m, xv = "ecospat.corrected", yv = "distance",
+myplot <- plotAnalysis(data = overlapPdData, m = m, xv = "nicheOverlap", yv = "phyloDistance",
                        nodeNumber = "node1", showStats = T,
                        xlabname = "Niche overlap of occurrence records", ylabname = "Phylogenetic distances between clades")
 
@@ -187,26 +194,26 @@ rm(myplot, m)
 #########################################################################
 
 ### Eliminate outlier
-outlier <- which(max(ageVolData$value) == ageVolData$value)
+outlier <- which(max(ageVolData$speciesAge) == ageVolData$speciesAge)
 ageVol <- ageVolData[-outlier,]
 
-m <- lm(value ~ ecospat.corrected, ageVol)
+m <- lm(speciesAge ~ nicheVolume, ageVol)
 
-myplot <- plotAnalysis(data=ageVolData[-outlier,], m=m, xv = "ecospat.corrected", yv = "value", 
+myplot <- plotAnalysis(data=ageVolData[-outlier,], m=m, xv = "nicheVolume", yv = "speciesAge", 
                        nodeNumber = "node1", showStats = T,
                        xlabname = "Niche volume of occurrence records", ylabname = "Clade age")
 
 # save
-ggsave(paste("Y:\\clade_age_nicheVolume_legend.png", sep = ""), plot = myplot,
+ggsave(paste("Y:\\clade_age_nicheVolume_legend_acaena.png", sep = ""), plot = myplot,
        width = 300, height = 210, units = 'mm')
 
 rm(myplot, m)
 
 
 ### Leave outlier
-m <- lm(value ~ ecospat.corrected, ageVolData)
+m <- lm(speciesAge ~ nicheVolume, ageVolData)
 
-myplot <- plotAnalysis(data=ageVolData, m=m, xv = "ecospat.corrected", yv = "value", 
+myplot <- plotAnalysis(data=ageVolData, m=m, xv = "nicheVolume", yv = "speciesAge", 
                        nodeNumber = "node1", showStats = T,
                        xlabname = "Niche volume of occurrence records", ylabname = "Clade age")
 
