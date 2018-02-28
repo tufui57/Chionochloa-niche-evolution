@@ -1,13 +1,11 @@
 ###################################################
-### Clade niche
+### Data preparation
 ###################################################
 
-source(".//Chionochloa niche evolution//06_Clade_pairing.R")
+genus_name <- "Chionochloa"
 
-library(dplyr)
-library(grid)
-library(gridExtra)
-library(ggplot2)
+source(".//Chionochloa niche evolution//09_DataPreparation.R")
+source(".//Chionochloa niche evolution//06_Clade_pairing.R")
 
 ###################################################
 ###  Climate data preparation
@@ -19,23 +17,11 @@ extent_x = c(min(scores$PC1), max(scores$PC1))
 extent_y = c(min(scores$PC2), max(scores$PC2))
 
 ########################################################################################
-### Node niche
+### Get climate dta of sister clades
 ########################################################################################
-
-# Make species name tag
-source(".//Chionochloa niche evolution//makeTag.R")
-makeTag(colnames(scores), "Chionochloa")
-
-
-########################################################################################
-### Plot clade niche of internal nodes
-########################################################################################
-
-source(".//Acaena niche evolution//generateClimateDataOfClades.R")
-source(".//Acaena niche evolution//plotClimateSpaceWithSpNameList.R")
 
 # Check if one of their species has no occurrence rescords.
-scores[, grepl("Chion", colnames(scores))] %>% colSums
+scores[, grepl(genus_name, colnames(scores))] %>% colSums
 
 # Check which species are not shared between phylogenetic tree and occurrence record data
 rownames(nodes)[!(rownames(nodes) %in% colnames(scores))]
@@ -47,17 +33,15 @@ noOccSpNo <- which(!(rownames(nodes) %in% colnames(scores)))
 noOccSisSpNo <- which(allnodesister %in% noOccSpNo)
   
 ## The following nodes must be eliminated. Because no occurrence data for them or their sister clades.
-number <- (1:max(chion$edge))[-c(noOccSpNo,
+number <- (1:max(tree$edge))[-c(noOccSpNo,
                                  noOccSisSpNo,
-                                 39, # Oldest ancestor node
-                                 74, 75, # Outgroup nodes
-                                 40, 41 # Sister nodes of Outgroup nodes
+                                 35 # Oldest ancestor node
                                  )]
 
 cladedata <- lapply(number, function(i){
   
-  clades <- generateClimateDataOfClades(i, chion, allnodesister, scores, 
-                                        nodes = nodes, tips = tips, spnameCodes = spname)
+  clades <- generateClimateDataOfClades(i, tree, allnodesister, scores, 
+                                        nodes = nodes, tips = tips, spnameCodes = codes)
   
   return(clades)
   }
@@ -66,6 +50,11 @@ cladedata <- lapply(number, function(i){
 names(cladedata) <- number
 
 save(cladedata, file = ".//cladePairData_chion.data")
+
+
+########################################################################################
+### Plot clade niche of internal nodes
+########################################################################################
 
 load(".//cladePairData_chion.data")
 
@@ -84,7 +73,7 @@ for(i in targetnodes){
   ploTwoGroupWithSpNames(background = scores,
                          axis1 = "PC1", axis2 = "PC2", # Names of coordinates
                          data1 = clades[[1]], data2 = clades[[3]], # Dataframes of two groups of points
-                         col1 = "green", col2 = "purple",
+                         col1 = "red", col2 = "blue",
                          nodeName = clades[[2]],
                          sisnodeName = clades[[4]],
                          nodeNumber = strsplit(clades[[5]]," ")[[1]][1],
