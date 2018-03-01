@@ -1,10 +1,8 @@
 
-genus_name <- "Chionochloa"
+genus_name <- "Acaena"
 
-source(".//Chionochloa niche evolution//09_DataPreparation.R")
+source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
-
-sispairs <- sispairs[-c(1,8), ]
 ########################################################################################
 ### Plot niche of sister species pair and its sister nodes (aunt of target pair)
 ########################################################################################
@@ -81,7 +79,7 @@ plot_sister_ancestor <- function(i,
   granma <- tree$edge[which(ancestor == tree$edge[, 2])]
   extree <- extract.clade(tree, granma)
   
-  extree$tip.label <- makeTag_separate(extree$tip.label, genus_name, "_") %>% pull(., tag)
+  extree$tip.label <- makeTag_separate(clean_speciesname(extree$tip.label), genus_name, "_") %>% pull(., tag)
   
   # Create dataframe to tell colours of tip labels
   dd <- data.frame(taxa  = extree$tip.label,

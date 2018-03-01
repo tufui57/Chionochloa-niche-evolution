@@ -31,6 +31,8 @@ if(genus_name == "Chionochloa"){
   sislist <- list_sisterSpPairs(tree) %>% as.data.frame %>% na.omit
   duppair <- apply(sislist, 1, sort)[1,] %>% duplicated
   sispairs <- sislist[!duppair, ]
+  # Omit no occurrence record species
+  sispairs <- sispairs[-c(1,8), ]
   
   # Load PCA data and clade paired PCA data
   load(".//Scores_chion.data")
@@ -49,6 +51,8 @@ if(genus_name == "Acaena"){
   sislist <- list_sisterSpPairs(tree) %>% as.data.frame %>% na.omit
   duppair <- apply(sislist, 1, sort)[1,] %>% duplicated
   sispairs <- sislist[!duppair, ]
+  # Omit no occurrence record species
+  sispairs <- sispairs[-c(5,6), ]
   
   # Load PCA data and clade paired PCA data
   load(".//Scores.data")
@@ -57,7 +61,7 @@ if(genus_name == "Acaena"){
   
 }
 
-source(paste(".//", genus_name, " niche evolution//06_Clade_pairing.R", sep = ""))
+source(".//Chionochloa niche evolution//06_Clade_pairing.R")
 
 # Extent of axes for plotting
 extent_x = c(min(scores$PC1), max(scores$PC1))
