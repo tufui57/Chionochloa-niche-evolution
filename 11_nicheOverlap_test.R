@@ -6,8 +6,86 @@ genus_name <- "Acaena"
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
+library(EcoSimR)
 library(ecospat)
 
+data <- read.csv("Y:\\Acaena project\\acaena_bioclim_landcover_1km.csv")
+
 ##############################################################################
-### Niche overlap testing
+### EcoSiR
 ##############################################################################
+# I haven't understood the metric and this package isn't commonly used.
+sp = "Acaena_tesca"
+
+testd <- data[!is.na(data[,sp]),]
+warbMod <- niche_null_model(testd[, c("x","y",sp)], nReps=1000)
+## Summary and plot info
+summary(warbMod)
+plot(warbMod)
+plot(warbMod,type="niche")
+
+
+##############################################################################
+### ecospat
+##############################################################################
+
+niche.similarity_ecospat <-
+  function(background,
+           axis1, 
+           axis2,
+           data1, 
+           data2,
+           alternative = "greater",
+           R = 100, # Resolution of background
+           rep # times to repeat similarity test
+  ) {
+    
+    background.clim <- background[, c(axis1, axis2)]
+    
+    # calculation of occurence density and test of niche equivalency and similarity
+    z1 <- ecospat::ecospat.grid.clim.dyn(background.clim, background.clim, data1[ ,c(axis1, axis2)], R = 100)
+    z2 <- ecospat::ecospat.grid.clim.dyn(background.clim, background.clim, data2[ ,c(axis1, axis2)], R = 100)
+   
+    ## test niche similarity
+    res <- ecospat::ecospat.niche.similarity.test(z1, z2, rep = rep, alternative = alternative)
+    ## Name
+    return(res)
+  }
+
+
+
+sisterpair_niche.similarity_test <- function(sisterpairnode, # vector of node ID pair
+         tree,
+         background,
+         axis1 = "PC1",
+         axis2 = "PC2", 
+         rep
+         ){
+  spname1 <- get_spname_from_nodeID(sisterpairnode[1],tree)
+  spname2 <- get_spname_from_nodeID(sisterpairnode[2],tree)
+  
+  d1 <- background[background[, spname1]==1,]
+  d2 <- background[background[, spname2]==1,]
+  sim <- niche.similarity_ecospat(background, axis1, axis2, d1, d2, R = 500, rep = rep)
+  sim.div <- niche.similarity_ecospat(background, axis1, axis2, d1, d2, alternative = "lower", R = 500, rep = rep)
+  
+  ecospat.plot.overlap.test(sim, "D", "Similarity")
+  ecospat.plot.overlap.test(sim.div, "D", "Similarity")
+  
+  res<-list()
+  res[[1]]<-sim
+  res[[2]]<-sim.div
+  
+  return(res)
+}
+
+similar <- apply(sispairs, 1, sisterpair_niche.similarity_test, tree, scores, rep = 500)
+save(similar, file = "Y://similaritytest.data")
+
+lapply(similar, function(x){
+  print()
+  print(x[[1]]$obs)
+  print(x[[1]]$p.D)
+})
+
+
