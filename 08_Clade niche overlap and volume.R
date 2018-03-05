@@ -2,15 +2,10 @@
 ### Clade niche overlap/volume
 ###################################################
 
-load(".//Scores_chion.data")
-load(".//cladePairData_chion.data")
+genus_name <- "Acaena"
 
-setwd(".//Chionochloa niche evolution")
+source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
-library(ecospat)
-# tidyverse loads too much DLLs. Load tidyr instead.
-library(tidyr)
-library(nichePlot)
 
 ###################################################
 # Calculate niche overlap between sister clades
@@ -47,7 +42,7 @@ nodeNo <- sapply(cladedata, "[[", 5) %>% strsplit(., "\ ")
 scholist$node1 <- as.numeric(do.call(rbind, lapply(nodeNo, "[[",1)))
 scholist$node2 <- as.numeric(do.call(rbind, lapply(nodeNo, "[[",2)))
 
-write.csv(scholist, ".//clade_schoennerD_chion.csv")
+write.csv(scholist, paste(".//clade_schoennerD_", genus_tag, ".csv", sep = ""))
 
 ###################################################
 ### Clade niche volume
@@ -65,9 +60,8 @@ for(i in 1:length(cladedata)){
   
 }
 
-source("..//Acaena niche evolution//SchonnerDdataframeFormat.r")
 nichevoldata <- SchonnerDdataframeFormat(nichevol)
 
-write.csv(nichevoldata, ".//clade_nicheVolume_chion.csv")
+write.csv(nichevoldata, paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
 
 

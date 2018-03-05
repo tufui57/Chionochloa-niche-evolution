@@ -3,18 +3,7 @@
 ###################################################
 
 genus_name <- "Chionochloa"
-
-source(".//Chionochloa niche evolution//09_DataPreparation.R")
-source(".//Chionochloa niche evolution//06_Clade_pairing.R")
-
-###################################################
-###  Climate data preparation
-###################################################
-
-load(".//Scores_chion.data")
-
-extent_x = c(min(scores$PC1), max(scores$PC1))
-extent_y = c(min(scores$PC2), max(scores$PC2))
+source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
 ########################################################################################
 ### Get climate dta of sister clades
@@ -31,32 +20,37 @@ colnames(scores)[!(colnames(scores) %in% rownames(nodes))]
 noOccSpNo <- which(!(rownames(nodes) %in% colnames(scores)))
 # No occurrence data for their sister clades
 noOccSisSpNo <- which(allnodesister %in% noOccSpNo)
-  
+
 ## The following nodes must be eliminated. Because no occurrence data for them or their sister clades.
 number <- (1:max(tree$edge))[-c(noOccSpNo,
                                  noOccSisSpNo,
-                                 35 # Oldest ancestor node
+                                 ifelse(genus_name == "Acaena", 20, 35) # Oldest ancestor node
                                  )]
 
 cladedata <- lapply(number, function(i){
   
-  clades <- generateClimateDataOfClades(i, tree, allnodesister, scores, 
+  clades <- try(
+    generateClimateDataOfClades(i, tree, allnodesister, scores, 
                                         nodes = nodes, tips = tips, spnameCodes = codes)
+  )
   
   return(clades)
   }
 )
+
 # Name clade data list with their node number
 names(cladedata) <- number
 
-save(cladedata, file = ".//cladePairData_chion.data")
+cladedata <- cladedata[lapply(cladedata, class) == "list"]
+
+save(cladedata, file = paste(".//cladePairData_", genus_tag, ".data", sep = ""))
 
 
 ########################################################################################
 ### Plot clade niche of internal nodes
 ########################################################################################
 
-load(".//cladePairData_chion.data")
+load(paste(".//cladePairData_", genus_tag, ".data", sep = ""))
 
 # Rrmove duplicated clade pairs
 spPairs <- sapply(1:length(cladedata), function(i){

@@ -2,46 +2,14 @@
 ### Clade niche analysis
 ###################################################
 
-library(phytools)
-library(dplyr)
-library(ggplot2)
-library(nichePlot)
-
-
 ##############################################################################
 ### Data preparation
 ##############################################################################
 
-genus_name <- "Chionochloa"
+genus_name <- "Acaena"
+# genus_name <- "Chionochloa"
 
-
-source(".//Acaena niche evolution//plotAnalysis_clade_niche.R")
-source(".//Acaena niche evolution//BIOMOD//Create_Package_speciseNameCleaning.r")
-
-if(genus_name == "Chionochloa"){
-  # Import phylogenetic tree data
-  tree <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\Chionochloa_genetic_data\\Chiono_summary.trees")
-  genus_tag <- "chion"
-  
-  # Get sister pairs
-  sislist <- list_sisterSpPairs(tree) %>% as.data.frame %>% na.omit
-  duppair <- apply(sislist, 1, sort)[1,] %>% duplicated
-  sispairs <- sislist[!duppair, ]
-}
-
-if(genus_name == "Acaena"){
-  # Import phylogeny tree data
-  tree <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\From Angela\\NZ_Acaena_BEAST_output_6gene.tree")
-  genus_tag <- "acaena"
-  
-  # Get sister pairs
-  sislist <- list_sisterSpPairs(tree) %>% as.data.frame %>% na.omit
-  duppair <- apply(sislist, 1, sort)[1,] %>% duplicated
-  sispairs <- sislist[!duppair, 1]
-  
-}
-
-source(paste(".//", genus_name, " niche evolution//06_Clade_pairing.R", sep = ""))
+source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
 #########################################################################
 ### Plots

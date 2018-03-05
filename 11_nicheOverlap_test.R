@@ -2,27 +2,28 @@
 ### Data preparation
 ##############################################################################
 
-genus_name <- "Acaena"
-
+# genus_name <- "Acaena"
+genus_name <- "Chionochloa"
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
 library(EcoSimR)
 library(ecospat)
 
-data <- read.csv("Y:\\Acaena project\\acaena_bioclim_landcover_1km.csv")
+# data <- read.csv("Y:\\Acaena project\\acaena_bioclim_landcover_1km.csv")
+data <- read.csv("Y:\\Acaena project\\chionochloa_bioclim_landcover_1km.csv")
 
-##############################################################################
-### EcoSiR
-##############################################################################
-# I haven't understood the metric and this package isn't commonly used.
-sp = "Acaena_tesca"
-
-testd <- data[!is.na(data[,sp]),]
-warbMod <- niche_null_model(testd[, c("x","y",sp)], nReps=1000)
-## Summary and plot info
-summary(warbMod)
-plot(warbMod)
-plot(warbMod,type="niche")
+# ##############################################################################
+# ### EcoSiR
+# ##############################################################################
+# # I haven't understood the metric and this package isn't commonly used.
+# sp = "Acaena_tesca"
+# 
+# testd <- data[!is.na(data[,sp]),]
+# warbMod <- niche_null_model(testd[, c("x","y",sp)], nReps=1000)
+# ## Summary and plot info
+# summary(warbMod)
+# plot(warbMod)
+# plot(warbMod,type="niche")
 
 
 ##############################################################################
@@ -80,7 +81,9 @@ sisterpair_niche.similarity_test <- function(sisterpairnode, # vector of node ID
 }
 
 similar <- apply(sispairs, 1, sisterpair_niche.similarity_test, tree, scores, rep = 500)
-save(similar, file = "Y://similaritytest.data")
+# save(similar, file = "Y://similaritytest.data")
+
+save(similar, file = "Y://similaritytest_chion.data")
 
 lapply(similar, function(x){
   print()

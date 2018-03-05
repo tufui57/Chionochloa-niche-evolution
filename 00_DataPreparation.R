@@ -22,8 +22,8 @@ source(".//Acaena niche evolution//plotClimateSpaceWithSpNameList.R")
 
 if(genus_name == "Chionochloa"){
   # Import phylogenetic tree data
-  tree <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\Chionochloa_genetic_data\\Chiono_summary.trees")
-  tree <- extract.clade(tree, 41)
+  org.tree <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\Chionochloa_genetic_data\\Chiono_summary.trees")
+  tree <- extract.clade(org.tree, 41)
   
   genus_tag <- "chion"
   
@@ -36,14 +36,13 @@ if(genus_name == "Chionochloa"){
   
   # Load PCA data and clade paired PCA data
   load(".//Scores_chion.data")
-  #load(".//cladePairData_chion.data")
-  
+  load(".//cladePairData_chion.data")
 }
 
 if(genus_name == "Acaena"){
   # Import phylogeny tree data
-  tree <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\From Angela\\NZ_Acaena_BEAST_output_6gene.tree")
-  tree <- extract.clade(tree, 28)
+  org.tree <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\From Angela\\NZ_Acaena_BEAST_output_6gene.tree")
+  tree <- extract.clade(org.tree, 28)
   
   genus_tag <- "acaena"
   
@@ -56,7 +55,7 @@ if(genus_name == "Acaena"){
   
   # Load PCA data and clade paired PCA data
   load(".//Scores.data")
-  load(".//cladePairData.data")
+  load(".//cladePairData_acaena.data")
   
   
 }
