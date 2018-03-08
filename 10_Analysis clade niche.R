@@ -27,7 +27,7 @@ overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
 sisOverlapPd <- (overlapPdData$node1 %in% sispairs[,1]) %>% overlapPdData[., ]
 
 myplot <- plotAnalysis(data = sisOverlapPd, 
-                       yv = "nicheOverlap", xv = "phyloDistance", 
+                       yv = "nicheOverlap", xv = "divergenceTime", 
                        nodeNumbercol = "node1", showStats = T,
                        ylabname = "Niche overlap of occurrence records", 
                        xlabname = "Phylogenetic distances between sister species pairs",
@@ -36,7 +36,7 @@ myplot <- plotAnalysis(data = sisOverlapPd,
   ylim(0, 1)
 
 # save
-ggsave(paste("Y:\\sister_pd_nicheoverlap_legend_", genus_tag, ".png", sep = ""), plot = myplot,
+ggsave(paste("Y:\\sister_divergenceTime_nicheoverlap_legend_", genus_tag, ".png", sep = ""), plot = myplot,
        width = 300, height = 210, units = 'mm')
 
 rm(myplot)
@@ -129,6 +129,61 @@ ggsave(paste("Y:\\clade_pd_nicheoverlap_outlier_", genus_tag, ".png", sep = ""),
        width = 300, height = 210, units = 'mm')
 
 rm(myplot)
+
+#########################################################################
+### Clade times since divergence ~ niche overlap of occurrence records
+#########################################################################
+
+overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
+
+### Omit duplicated pairs
+dup <- duplicated(overlapPdData$divergenceTime) %>% which
+overlapPdData2 <- overlapPdData[-dup, ]
+
+
+### Eliminate sister species pairs
+overlapPdclade <- (!(overlapPdData2$node1 %in% sispairs[ , 1])) %>% overlapPdData2[.,]
+
+
+### Eliminate outlier of clade age
+
+outlier <- which(max(overlapPdclade$divergenceTime) == overlapPdclade$divergenceTime)
+
+overlapPd <- overlapPdclade[-outlier, ]
+
+myplot <- plotAnalysis(data = overlapPd,
+                       yv = "nicheOverlap", xv = "divergenceTime", 
+                       nodeNumbercol = "node1", showStats = T,
+                       ylabname = "Niche overlap of occurrence records",
+                       xlabname = "Phylogenetic distances between clades",
+                       label.point = TRUE
+) +
+  ylim(0, 1)
+
+# save
+ggsave(paste("Y:\\clade_divergenceTime_nicheoverlap_legend_", genus_tag, ".png", sep = ""), plot = myplot,
+       width = 300, height = 210, units = 'mm')
+
+rm(myplot)
+
+
+### Leave outlier of clade age in data
+
+myplot <- plotAnalysis(data = overlapPdclade, 
+                       yv = "nicheOverlap", xv = "divergenceTime",
+                       nodeNumbercol = "node1", showStats = T,
+                       ylabname = "Niche overlap of occurrence records", 
+                       xlabname = "Phylogenetic distances between clades",
+                       label.point = TRUE
+) +
+  ylim(0, 1)
+
+# save
+ggsave(paste("Y:\\clade_divergenceTime_nicheoverlap_outlier_", genus_tag, ".png", sep = ""), plot = myplot,
+       width = 300, height = 210, units = 'mm')
+
+rm(myplot)
+
 
 #########################################################################
 ### Clade ages ~ niche volume of occurrence records

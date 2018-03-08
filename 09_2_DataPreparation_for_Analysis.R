@@ -2,7 +2,7 @@
 ### Clade niche overlap/volume
 ###################################################
 
-genus_name <- "Acaena"
+genus_name <- "Chionochloa"
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
@@ -80,8 +80,47 @@ for(i in overlapPdData$node1){
 # Phylogenetic distances; difference of branch length between sister clade pair. 
 #                         This difference means 
 
+overlap <- read.csv(paste(".//clade_schoennerD_", genus_tag, ".csv", sep = ""))
 
+library(phylobase)
 
+get.ancestorNodeLength <- function(tree, node){
+  tree2 <- extractTree(tree)
+  ancNode <- ancestor(tree2, node)
+  
+  dis <- dist.nodes(tree)
+  ancNodeAge <- dis[min(getDescendants(tree, ancNode)), ancNode]
+  
+  return(ancNodeAge)
+}
+
+### Calculate time since divergence, branch length of the clade pair's closest ancestor
+leng <- sapply(1:nrow(overlapPdData), function(i){
+  get.ancestorNodeLength(tree, overlap[i, "node1"])
+}
+)
+
+dist <- data.frame(distance2)
+
+overlapPdData <- cbind(overlap, dist[dist$node %in% overlap$node1, ])[ ,c("node1", "node2", 
+                                                                        "ecospat.corrected", "distance")]
+
+colnames(overlapPdData)[3:4] <- c("nicheOverlap", "phyloDistance")
+overlapPdData <- mutate(overlapPdData, divergenceTime = leng)
+
+# Species name of node
+overlapspnames <- (nodes$nodelabel %in% overlapPdData$node1) %>% rownames(nodes)[.]
+
+# Add species names
+overlapPdData <- mutate(overlapPdData, node1name = 
+                          c(overlapspnames, rep(NA, nrow(overlapPdData) - length(overlapspnames)))
+)
+
+# Show sister species list
+for(i in overlapPdData$node1){
+  print(i)
+  print(rownames(nodes)[allnodesister[[i]]])
+}
 
 
 write.csv(overlapPdData, 
