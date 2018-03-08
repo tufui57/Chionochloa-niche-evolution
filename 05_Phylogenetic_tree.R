@@ -3,8 +3,9 @@
 ########################################################################################
 genus_name = "Chionochloa"
 
-source(".//Chionochloa niche evolution//09_DataPreparation.R")
+source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
+tree<-
 ########################################################################################
 ### Plot edge length on trees
 ########################################################################################

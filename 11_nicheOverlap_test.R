@@ -6,11 +6,10 @@
 genus_name <- "Chionochloa"
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
-library(EcoSimR)
+#library(EcoSimR)
 library(ecospat)
 
-# data <- read.csv("Y:\\Acaena project\\acaena_bioclim_landcover_1km.csv")
-data <- read.csv("Y:\\Acaena project\\chionochloa_bioclim_landcover_1km.csv")
+data <- read.csv(paste("Y:\\Acaena project\\", genus_name, "_bioclim_landcover_1km.csv", sep = ""))
 
 # ##############################################################################
 # ### EcoSiR
@@ -81,14 +80,25 @@ sisterpair_niche.similarity_test <- function(sisterpairnode, # vector of node ID
 }
 
 similar <- apply(sispairs, 1, sisterpair_niche.similarity_test, tree, scores, rep = 500)
-# save(similar, file = "Y://similaritytest.data")
 
-save(similar, file = "Y://similaritytest_chion.data")
+save(similar, file = paste("Y://similaritytest_", genus_name, ".data", sep = ""))
 
-lapply(similar, function(x){
-  print()
-  print(x[[1]]$obs)
-  print(x[[1]]$p.D)
-})
+for(i in 1:length(similar)){
+  # Species node ID
+    print(paste("species ID", names(similar)[i]))
+
+  # Observed niche similarity I and D
+    print(similar[[i]][[2]]$obs)
+    
+    # P value of the test if the two niches are more similar than random.
+    print(paste("Conservatism; p value", similar[[i]][[1]]$p.D))
+    # P value of the test if the two niches are less similar than random.
+    print(paste("Divergence; p value", similar[[i]][[2]]$p.D))
+  }
 
 
+#load("Y://similaritytest_chion.data")
+
+sapply(similar, function(x){
+  return(x[[1]]$p.D)
+}) %>% mean

@@ -70,5 +70,19 @@ for(i in overlapPdData$node1){
   print(rownames(nodes)[allnodesister[[i]]])
 }
 
+
+###################################################
+### Add divergence time
+###################################################
+
+# Divergence time; branch length of older branch within sister clade pair. 
+#                  What should be compared is lwngths of time since the two clades diverged from their ancestral species.
+# Phylogenetic distances; difference of branch length between sister clade pair. 
+#                         This difference means 
+
+
+
+
+
 write.csv(overlapPdData, 
-          paste("Nicheovrlap_PD", genus_tag, ".csv", sep = ""))
+          paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
