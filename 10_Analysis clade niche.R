@@ -6,8 +6,8 @@
 ### Data preparation
 ##############################################################################
 
-genus_name <- "Acaena"
-# genus_name <- "Chionochloa"
+# genus_name <- "Acaena"
+genus_name <- "Chionochloa"
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
@@ -30,7 +30,7 @@ myplot <- plotAnalysis(data = sisOverlapPd,
                        yv = "nicheOverlap", xv = "divergenceTime", 
                        nodeNumbercol = "node1", showStats = T,
                        ylabname = "Niche overlap of occurrence records", 
-                       xlabname = "Phylogenetic distances between sister species pairs",
+                       xlabname = "Time since divergence",
                        label.point = TRUE
 ) +
   ylim(0, 1)
@@ -64,16 +64,16 @@ dup <- duplicated(ancsisOverlapPd$nicheOverlap) %>% which
 ancsisOverlapPd <- ancsisOverlapPd[-dup, ]
 
 myplot <- plotAnalysis(data = ancsisOverlapPd,
-                       yv = "nicheOverlap", xv = "phyloDistance", 
+                       yv = "nicheOverlap", xv = "divergenceTime", 
                        nodeNumbercol = "node1", showStats = T,
                        ylabname = "Niche overlap of occurrence records", 
-                       xlabname = "Phylogenetic distances between sister species pair and its closest clade",
+                       xlabname = "Time since divergence of parent of sister species pair and its closest clade",
                        label.point = TRUE
 ) +
   ylim(0, 1)
 
 # save
-ggsave(paste("Y:\\sisterAunt_pd_nicheoverlap_legend_", genus_tag, ".png", sep = ""), plot = myplot,
+ggsave(paste("Y:\\sisterAunt_divergenceTime_nicheoverlap_legend_", genus_tag, ".png", sep = ""), plot = myplot,
        width = 300, height = 210, units = 'mm')
 
 rm(myplot)
@@ -155,7 +155,7 @@ myplot <- plotAnalysis(data = overlapPd,
                        yv = "nicheOverlap", xv = "divergenceTime", 
                        nodeNumbercol = "node1", showStats = T,
                        ylabname = "Niche overlap of occurrence records",
-                       xlabname = "Phylogenetic distances between clades",
+                       xlabname = "Time since divergence of siter clades",
                        label.point = TRUE
 ) +
   ylim(0, 1)
@@ -173,7 +173,7 @@ myplot <- plotAnalysis(data = overlapPdclade,
                        yv = "nicheOverlap", xv = "divergenceTime",
                        nodeNumbercol = "node1", showStats = T,
                        ylabname = "Niche overlap of occurrence records", 
-                       xlabname = "Phylogenetic distances between clades",
+                       xlabname = "Time since divergence of siter clades",
                        label.point = TRUE
 ) +
   ylim(0, 1)

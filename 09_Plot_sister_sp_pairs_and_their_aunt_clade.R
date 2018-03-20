@@ -7,8 +7,8 @@ source(".//Chionochloa niche evolution//00_DataPreparation.R")
 ### Plot niche of sister species pair and its sister nodes (aunt of target pair)
 ########################################################################################
 
-plot_sister_ancestor <- function(i,
-                                 spnameCodes,
+plot_sister_ancestor <- function(i, # target node ID
+                                 spnameCodes, # list if species name codes
                                  cols, # Colours of points for c(aunt clade, sister species 1, sister species 2) 
                                  pl = FALSE # Plot 
 ){
