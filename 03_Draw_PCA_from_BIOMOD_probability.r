@@ -1,63 +1,61 @@
-############################################################################################################
-############################   Get Schoenner's D from two groups of probability
-############################################################################################################
-
-library(dplyr)
-library(dismo)
-library(raster)
-source(".\\Chionochloa niche evolution\\makeTag.R")
-source(".//Acaena niche evolution//plotAnalysis_clade_niche.R")
 
 genus_name <- "Chionochloa"
 
-# Load prediction of ensemble model
-load("Y://ensemblePrediction_chion.data")
+library(dismo)
 
-source(paste(".\\", genus_name, " niche evolution\\06_Clade_pairing.R", sep = ""))
+source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
-spname <- gsub("\\.", "\\_", names(pred)) %>% 
-  gsub("var_", "var.", .) %>% 
-  gsub("subsp_", "subsp.", .)
+# Load ensamble projection data
+load(paste("Y://ensemblePrediction_", genus_tag, ".data", sep = ""))
 
-code <- makeTag_separate(spname, genus_name, "_")
-
-# First clade in sister pairs
-sispairs <- c(9,29,20,33,15,12,4,6,31,30)
-
-probD <- list()
-for(i in sispairs){
+# Extract probability by node number
+get_BIOMOD_probability_by_nodeID <- function(i # node ID number
+){
   # Species name codes
-  nodeName = pull(code[code$X %in% rownames(nodes)[i], ], X)
-  sisnodeName = pull(code[code$X %in% rownames(nodes)[allnodesister[[i]]], ], X)
+  nodeName <- pull(codes[codes$X %in% rownames(nodes)[i], ], X)
   
-  probANS <- (spname == nodeName) %>% pred[.]
-  probDUM <- (spname == sisnodeName) %>% pred[.]
+  prob <- (spname == nodeName) %>% pred[.]
+  
+  return(prob)
+}
+
+####################################################################
+### Get Schoenner's D between two sipecies occurrence probability
+####################################################################
+
+# Extract probability by node number
+probD <- list()
+
+for(i in sispairs[,1]){
+  
+  prob1 <- get_BIOMOD_probability_by_nodeID(i)
+  prob2 <- get_BIOMOD_probability_by_nodeID(allnodesister[[i]])
+  
   ### Use dismo::nicheOverlap
-  probD[[i]] <- nicheOverlap(probANS[[1]], probDUM[[1]], stat = 'D', mask = TRUE, checkNegatives = TRUE) 
-  
+  probD[[i]] <- nicheOverlap(prob1[[1]], prob2[[1]], stat = 'D', mask = TRUE, checkNegatives = TRUE)
 }
 
 
 
 ############################################################################################################
-##### Compare Schoenner's D from two groups of probability and the one from occurrence records
+##### Compare Schoenner's D from probability and the one from occurrence records
 ############################################################################################################
 
 # Import data
-overlapPdData <- read.csv("Nicheovrlap_PD_chion.csv")
+overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
 
 ### Node numbers of sister species pairs
-sisOverlapPd <- (overlapPdData$node1 %in% sispairs) %>% overlapPdData[., ]
+sisOverlapPd <- (overlapPdData$node1 %in% sispairs[,1]) %>% overlapPdData[., ]
 
 overlaps <- cbind(sisOverlapPd, unlist(probD))
 colnames(overlaps)[ncol(overlaps)] <- "probD"
 
 
 m <- lm(probD ~ nicheOverlap, overlaps)
-myplot <- plotAnalysis(data = overlaps, 
-                       m = m, 
+myplot <- plotAnalysis(data = overlaps,
                        xv = "nicheOverlap", yv = "probD", 
-                       nodeNumber = "node1", showStats = T,
+                       nodeNumbercol = "node1", showStats = T,
+                       genus_name = genus_name,
                        xlabname = "Niche overlap of occurrence records", ylabname = "Niche overlap of model prediction"
 )
 
@@ -65,24 +63,23 @@ myplot <- plotAnalysis(data = overlaps,
 ggsave(paste("Y:\\sister_nicheoverlap_chion.png", sep = ""), plot = myplot,
        width = 300, height = 210, units = 'mm')
 
-rm(myplot, m)
+rm(myplot)
 
 
 #########################################################################
 ### Sister species pairs' Phylogenetic distances ~ niche overlap of predictions
 #########################################################################
 
-m <- lm(phyloDistance ~ probD, overlaps)
-myplot <- plotAnalysis(data = overlaps, 
-                       m = m, 
-                       yv = "phyloDistance", xv = "probD", 
-                       nodeNumber = "node1", showStats = T,
-                       ylabname = "Phylogenetic distances between sister species pairs", xlabname = "Niche overlap of model prediction"
+myplot <- plotAnalysis(data = overlaps,
+                       yv = "divergenceTime", xv = "probD", 
+                       nodeNumbercol = "node1", showStats = T,
+                       genus_name = genus_name,
+                       ylabname = "Divergence Time", xlabname = "Niche overlap of model prediction"
 )
 
 # save
 ggsave(paste("Y:\\sister_predNicheoverlap_phyloDistance_chion.png", sep = ""), plot = myplot,
        width = 300, height = 210, units = 'mm')
 
-rm(myplot, m)
+rm(myplot)
 

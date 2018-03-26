@@ -95,18 +95,3 @@ ggsave(paste("Y:\\chionochloa_proportionSecondary_spNicheVolume.png", sep = ""),
 
 rm(myplot, m)
 
-
-#########################################################################
-### Proportion of Secondary Open Habitat ~ species age
-#########################################################################
-
-m <- lm(proportionSecondaryHabitat ~ x, d)
-
-myplot <- plotAnalysis(data=d, m=m, xv = "proportionSecondaryHabitat", yv = "x", showStats = T,
-                       xlabname = "Proportion of secondary open habitat", ylabname = "Species age")
-
-# save
-ggsave(paste("Y:\\chionochloa_proportionSecondary_spAge.png", sep = ""), plot = myplot,
-       width = 300, height = 210, units = 'mm')
-
-rm(myplot, m)

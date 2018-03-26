@@ -34,6 +34,7 @@ allnodesister[1:length(tipssister)] <- tipssister
 ########################################################################################
 ### Phylogenetic distance between nodes
 ########################################################################################
+# Phylogenetic distance between internal nodes is branch lengths connecting the nodes.
 
 # The order of the node pair doesn't matter. 
 # dist.nodes(tree)[i, getSisters(tree, i)] == dist.nodes(tree)[getSisters(tree, i), i]
