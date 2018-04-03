@@ -19,7 +19,9 @@ nodeSp <- sapply(1:(length(tree$edge.length) + 1), count_spRichness, tree = tree
 names(nodeSp) <- 1:(length(tree$edge.length) + 1)
 
 
-ageVolSprich <- mutate(ageVolData, nodeSpRichness = nodeSp[names(nodeSp) %in% ageVolData$node1],
+ageVolSprich <- mutate(ageVolData, nodeSpRichness = nodeSp[names(nodeSp) %in% ageVolData$node1])
+
+ageVolSprich <- mutate(ageVolSprich,
                        nicheVolumePerSp = ageVolSprich$nicheVolume/ageVolSprich$nodeSpRichness)
 
 # Compare the following two.

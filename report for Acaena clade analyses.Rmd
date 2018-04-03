@@ -3,8 +3,8 @@ title: "Linear regressions for niche analysis of Acaena clades"
 author: "Miki Nomura"
 date: "21 March 2018"
 output:
-  word_document: default
   pdf_document: default
+  word_document: default
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -17,8 +17,8 @@ opts_knit$set(root.dir='../')
 
 ```{r Data preparation, include=FALSE}
 
-genus_name <- "Acaena"
-# genus_name <- "Chionochloa"
+#genus_name <- "Acaena"
+genus_name <- "Chionochloa"
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
@@ -38,6 +38,8 @@ Numbers above points are node ID of one of sister species
 
 sisOverlapPd <- (overlapPdData$node1 %in% sispairs[,1]) %>% overlapPdData[., ]
 
+### Eliminate outlier
+outlier <- which(max(sisOverlapPd$divergenceTime) == sisOverlapPd$divergenceTime)
 
 myplot <- plotAnalysis(data = sisOverlapPd, genus_name = genus_name,
                        yv = "nicheOverlap", xv = "divergenceTime", 
@@ -46,7 +48,7 @@ myplot <- plotAnalysis(data = sisOverlapPd, genus_name = genus_name,
                        xlabname = "Time since divergence",
                        label.point = TRUE
 ) +
-  ylim(0, 1) # Niche overlap ranges 0 - 1, so I delimited y axis but it got rid of confidense interval from this figure.
+  ylim(0, 1) # Niche overlap ranges 0 - 1, so I delimited y axis but it can get rid of confidense interval from this figure.
 
 
 plot(myplot)
@@ -62,29 +64,42 @@ Numbers above points are node ID of ancestor's sister
 
 ```{r Sister species pair and their aunt clade}
 
-
-ancSisNode <- sapply(sispairs[,1], function(i){
+# Get ancestor's sister node (aunt for sister species pairs)
+ancSisNode <- sapply(1:nrow(sispairs), function(i){
   
-  ancestor <- tree$edge[which(i == tree$edge[, 2])]
+  ancestor <- tree$edge[which(sispairs[i, 1] == tree$edge[, 2])]
   ancestorSisNode <- distance2[distance2[,"node"] == ancestor, "sisterNode"]
-  return(ancestorSisNode)
+  
+  nodelist <- cbind(sispairs[i, ], ancestor, ancestorSisNode)
+  return(nodelist)
   
 }
 )
 
+ancSisNode <- data.frame(t(ancSisNode))
+
 ancsisOverlapPd <- rbind(
-  ((overlapPdData$node1 %in% ancSisNode) %>% overlapPdData[., ]),
-  ((overlapPdData$node2 %in% ancSisNode) %>% overlapPdData[., ])
+  ((overlapPdData$node1 %in% ancSisNode$ancestorSisNode) %>% overlapPdData[., ]),
+  ((overlapPdData$node2 %in% ancSisNode$ancestorSisNode) %>% overlapPdData[., ])
 )
 
-dup <- duplicated(ancsisOverlapPd$nicheOverlap) %>% which
-ancsisOverlapPd <- ancsisOverlapPd[-dup, ]
+targetover <- list()
+for(i in 1:nrow(sispairs)){
+  node <- (overlapPdData$node1 == ancSisNode$ancestorSisNode[i]) %>% which
+if(overlapPdData$node2[node] == ancSisNode$ancestor[i]){
+  target <- overlapPdData[node, ]
+  targetover[[i]] <- cbind(target, ancSisNode[i,])
+}
+}
+
+
+ancsisOverlapPd <- do.call(rbind, targetover)
 
 myplot <- plotAnalysis(data = ancsisOverlapPd, genus_name = genus_name,
                        yv = "nicheOverlap", xv = "divergenceTime", 
                        nodeNumbercol = "node1", showStats = T,
                        ylabname = "Niche overlap of occurrence records", 
-                       xlabname = "Time since divergence of parent of sister species pair and its closest clade",
+                       xlabname = "Time since divergence of parent node of sister species pair and its closest clade",
                        label.point = TRUE
 ) +
   ylim(0, 1)
@@ -96,8 +111,34 @@ rm(myplot)
 
 ```
 
+## Fig. 3 Species age ~ niche volume of occurrence records
+Numbers above points are node ID of one of sister species
 
-##  Fig. 3 Clade divergence time ~ niche overlap of occurrence records
+```{r}
+
+### Extract sepcies
+clade <- is.na(ageVolData$spname) %>% which
+### Eliminate outlier
+outlier <- which(max(ageVolData$speciesAge[-clade]) == ageVolData$speciesAge)
+
+myplot <- plotAnalysis(data = #ageVolData[-c(outlier, clade), ], 
+                         ageVolData[-clade, ],
+                       genus_name = genus_name,
+                       yv = "nicheVolume", xv = "speciesAge",
+                       nodeNumbercol = "node1", showStats = T,
+                       ylabname = "Niche volume of occurrence records",
+                       xlabname = "Species age",
+                       label.point = TRUE
+) +
+  ylim(0, 1)
+
+plot(myplot)
+
+rm(myplot)
+
+```
+
+##  Fig. 4 Clade divergence time ~ niche overlap of occurrence records
 Numbers above points are node ID of one of sister clades
 
 ```{r}
@@ -111,17 +152,15 @@ overlapPdData2 <- overlapPdData[-dup, ]
 overlapPdclade <- (!(overlapPdData2$node1 %in% sispairs[ , 1])) %>% overlapPdData2[.,]
 
 
-### Eliminate outlier of clade age
+# ### Eliminate outlier of clade age
+# outlier <- which(max(overlapPdclade$divergenceTime) == overlapPdclade$divergenceTime)
+# overlapPd <- overlapPdclade[-outlier, ]
 
-outlier <- which(max(overlapPdclade$divergenceTime) == overlapPdclade$divergenceTime)
-
-overlapPd <- overlapPdclade[-outlier, ]
-
-myplot <- plotAnalysis(data = overlapPd, genus_name = genus_name,
+myplot <- plotAnalysis(data = overlapPdclade, genus_name = genus_name,
                        yv = "nicheOverlap", xv = "divergenceTime", 
                        nodeNumbercol = "node1", showStats = T,
                        ylabname = "Niche overlap of occurrence records",
-                       xlabname = "Time since divergence of siter clades",
+                       xlabname = "Time since divergence of sister clades",
                        label.point = TRUE
 ) +
   ylim(0, 1)
@@ -132,15 +171,18 @@ plot(myplot)
 rm(myplot)
 ```
 
-##  Fig. 4 Clade ages ~ niche volume of occurrence records
+##  Fig. 5 Clade ages ~ niche volume of occurrence records
 Numbers above points are node ID of clade. One outlier of clade age was omitted.
 
 ```{r}
 
+### Extract sepcies
+clade <- is.na(ageVolData$spname) %>% which
+sp <- (1:nrow(ageVolData))[-clade]
 ### Eliminate outlier
-outlier <- which(max(ageVolData$speciesAge) == ageVolData$speciesAge)
+# outlier <- which(max(ageVolData$speciesAge) == ageVolData$speciesAge)
 
-myplot <- plotAnalysis(data = ageVolData[-outlier,], genus_name = genus_name,
+myplot <- plotAnalysis(data = ageVolData[-sp,], genus_name = genus_name,
                        yv = "nicheVolume", xv = "speciesAge", 
                        nodeNumbercol = "node1", showStats = T,
                        ylabname = "Niche volume of occurrence records",
@@ -158,7 +200,7 @@ rm(myplot)
 
 
 
-##  Fig. 5 Proportion of secondary open habitat ~ Species ages
+##  Fig. 6 Proportion of secondary open habitat ~ Species ages
 
 ```{r}
 

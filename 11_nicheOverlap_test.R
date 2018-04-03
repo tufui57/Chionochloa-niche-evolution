@@ -11,22 +11,9 @@ library(ecospat)
 
 data <- read.csv(paste("Y:\\Acaena project\\", genus_name, "_bioclim_landcover_1km.csv", sep = ""))
 
-# ##############################################################################
-# ### EcoSiR
-# ##############################################################################
-# # I haven't understood the metric and this package isn't commonly used.
-# sp = "Acaena_tesca"
-# 
-# testd <- data[!is.na(data[,sp]),]
-# warbMod <- niche_null_model(testd[, c("x","y",sp)], nReps=1000)
-# ## Summary and plot info
-# summary(warbMod)
-# plot(warbMod)
-# plot(warbMod,type="niche")
-
 
 ##############################################################################
-### ecospat
+### Test by ecospat
 ##############################################################################
 
 niche.similarity_ecospat <-
@@ -97,8 +84,19 @@ for(i in 1:length(similar)){
   }
 
 
-#load("Y://similaritytest_chion.data")
+load(paste("Y://similaritytest_", genus_tag, ".data", sep = ""))
 
+# Display mean p values of similarity test
 sapply(similar, function(x){
   return(x[[1]]$p.D)
-}) %>% mean
+}) %>% 
+  mean %>% 
+  paste("Conservatism; Mean p-value over sister sepcies pairs;", .)
+
+
+sapply(similar, function(x){
+  return(x[[2]]$p.D)
+}) %>% 
+  mean %>% 
+  paste("Divergence; Mean p-value over sister sepcies pairs;", .)
+

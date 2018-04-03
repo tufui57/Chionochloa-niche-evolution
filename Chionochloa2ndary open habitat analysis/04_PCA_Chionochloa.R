@@ -29,10 +29,8 @@ extent_x = c(min(scores$PC1), max(scores$PC1))
 extent_y = c(min(scores$PC2), max(scores$PC2))
 
 ############################################################################################################
-##   Environmental space of Acaena occurrences in priamry and secondary open area
+##   Environmental space of occurrences in priamry and secondary open area
 ############################################################################################################
-
-spname=sname[1]
 
 PCAplot <- function(spname, extent_x, extent_y, save = TRUE) {
   al <- scores[scores[, spname] == 1,]

@@ -2,20 +2,30 @@
 ###     Draw maps for each sp coloured by land cover change     ###
 ##############################################################################################
 
+library(dplyr)
 library(raster)
 library(rgdal)
 library(maptools)
 
-# data import
-d1 <- read.csv("Y://Chionochloa_bioclim_landcover_history_inclNAonland.csv")
-d <- d1[is.na(d1$landCoverChange) == F, ]
+genus_name <- "Chionochloa"
+  
+if(genus_name == "Chionochloa"){
+    genus_tag <- "chion"
+    
+    # data import
+    chdata <- read.csv(paste("Y://Acaena project//", genus_name, "_bioclim_landcover_history_inclNAonland.csv", sep = ""))
+  }
 
-# sp name
-spname <- colnames(d1)[grep("^Chion", colnames(d1))]
-
-for(i in spname){
-  d[is.na(d[,i]),i] <- 0
+if(genus_name == "Acaena"){
+  genus_tag <- "acaena"
+  # data import
+  chdata <- read.csv(paste("Y://Acaena project//", genus_name, "_bioclim_landcover_history_inclNAonland.csv", sep = ""))
+  
 }
+
+
+# species name
+spname <- grepl(genus_name, colnames(chdata)) %>% colnames(chdata)[.]
 
 # Reference raster to create point object from coordinates
 ref <- raster("Y:\\GIS map and Climate data\\current_landcover1km.bil")
@@ -26,31 +36,32 @@ LAYERS <- ogrListLayers(path)
 nzland <- readOGR(path, LAYERS)
 
 ###############################################################
-## Point map for land use change of sp 
+## Point map for landcover change of sp 
 ###############################################################
 
-pointPlot_sp <- function(d, # Subset dataframe for a species including land cover change column 
+pointPlot_sp <- function(data, # Subset data frame for a species
                          title # Title of figure
                          ) {
   
-  d <- d[!is.na(d[, "landCoverChange"]),]
-  d <- d[ - which(d$landCoverChange == "nonPotentialHabitat" | d$landCoverChange == "NF-nonPotentialHabitat"| d$landCoverChange == "nonF-nonPotentialHabitat"| d$landCoverChange == "NF-EF" | d$landCoverChange == "NF-NF" | d$landCoverChange == "nonF-EF" | d$landCoverChange == "nonF-NF"),]
+  # Extract data
+  data <- data[!is.na(data[, "landCoverChange"]),]
+  data <- data[ - which(data$landCoverChange == "nonPotentialHabitat" | data$landCoverChange == "NF-nonPotentialHabitat"| data$landCoverChange == "nonF-nonPotentialHabitat"| data$landCoverChange == "NF-EF" | data$landCoverChange == "NF-NF" | data$landCoverChange == "nonF-EF" | data$landCoverChange == "nonF-NF"),]
   
-  # Convert land use change column to numeric
-  d$changeNo <- NA
-  d[d$landCoverChange == "nonF-nonF", "changeNo"] <- 1
-  d[d$landCoverChange == "NF-nonF", "changeNo"] <- 2
+  # Convert land cover change column to numeric
+  data$changeNo <- NA
+  data[data$landCoverChange == "nonF-nonF", "changeNo"] <- 1
+  data[data$landCoverChange == "NF-nonF", "changeNo"] <- 2
   
   # create point object
-  pts <- d[, c("x", "y")]
+  pts <- data[, c("x", "y")]
   
   # point coordinate system setting
-  coordinates(pts) <- d[, c("x", "y")]
+  coordinates(pts) <- data[, c("x", "y")]
   proj4pts <- proj4string(ref)
   proj4string(pts) <- CRS(proj4pts)
   
   # Land cover change column
-  pts$changeNo <- d$changeNo
+  pts$changeNo <- data$changeNo
   
   #####################
   # Plot
@@ -64,7 +75,7 @@ pointPlot_sp <- function(d, # Subset dataframe for a species including land cove
        pch = 21, axes = T,
        # no outline
        col = NA,
-       main = paste(title, "\n Number of occurrence cells = ", nrow(d)),
+       main = paste(title, "\n Number of occurrence cells = ", nrow(data)),
        cex.main = 1.8,
        # set extent
        xlim = extent(ref)[1:2], ylim = extent(ref)[3:4]
@@ -82,12 +93,12 @@ pointPlot_sp <- function(d, # Subset dataframe for a species including land cove
 
 ## all sp
 # extract sp data
-dall <- d[rowSums(d[, spname]) > -18,]
-pointPlot_sp(dall, "All studied sepcies of Chionochloa")
+chdataAllsp <- chdata[rowSums(chdata[, spname]) > 0,]
+pointPlot_sp(chdataAllsp, "test Chionochloa")
 
 ###############################################################
 ## Point map for land cover change of sp 
 ###############################################################
 
-d2 <- lapply(spname[c(1:16, 18:20, 22:length(spname))], function(i){d[d[,i]==1,]})
-lapply(c(1:16, 18:20, 22:30,32:length(spname)), function(i){pointPlot_sp(d2[[i]], title=spname[i])})
+chdata2 <- lapply(spname[c(1:16, 18:20, 22:length(spname))], function(i){chadata[chdata[,i]==1,]})
+lapply(c(1:16, 18:20, 22:30,32:length(spname)), function(i){pointPlot_sp(chdata2[[i]], title=spname[i])})
