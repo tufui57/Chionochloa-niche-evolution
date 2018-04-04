@@ -10,11 +10,11 @@ library(grid)
 library(gridExtra)
 library(ggtree)
 
-source(".//Acaena niche evolution//generateClimateDataOfClades.R")
-source(".//Acaena niche evolution//SchonnerDdataframeFormat.r")
-source(".//Acaena niche evolution//plotAnalysis_clade_niche.R")
-source(".//Acaena niche evolution//BIOMOD//Create_Package_speciseNameCleaning.r")
-source(".//Acaena niche evolution//plotClimateSpaceWithSpNameList.R")
+source(".//Acaena niche evolution//F_generateClimateDataOfClades.R")
+source(".//Acaena niche evolution//F_SchonnerDdataframeFormat.r")
+source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
+source(".//Acaena niche evolution//F_BIOMOD//Create_Package_speciseNameCleaning.r")
+source(".//Acaena niche evolution//F_plotClimateSpaceWithSpNameList.R")
 
 ##############################################################################
 ### Data preparation
@@ -54,7 +54,7 @@ if(genus_name == "Acaena"){
   sispairs <- sispairs[-c(5,6), ]
   
   # Load PCA data and clade paired PCA data
-  load(".//Scores.data")
+  load(".//Scores_acaena.data")
   load(".//cladePairData_acaena.data")
   
   

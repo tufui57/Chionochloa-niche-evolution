@@ -23,9 +23,14 @@ if(genus_name == "Acaena"){
   
 }
 
+chdata <- chdata[is.na(chdata$landCoverChange) == F, ]
 
 # species name
 spname <- grepl(genus_name, colnames(chdata)) %>% colnames(chdata)[.]
+
+for(i in spname){
+  chdata[is.na(chdata[,i]),i] <- 0
+}
 
 # Reference raster to create point object from coordinates
 ref <- raster("Y:\\GIS map and Climate data\\current_landcover1km.bil")
@@ -34,71 +39,52 @@ ref <- raster("Y:\\GIS map and Climate data\\current_landcover1km.bil")
 path = "Y:\\GIS map and Climate data\\lds-nz-coastlines-and-islands-polygons-topo-150k-SHP\\nz-coastlines-and-islands-polygons-topo-150k.shp"
 LAYERS <- ogrListLayers(path)
 nzland <- readOGR(path, LAYERS)
+# Crop extent of polygon
+nzland2 <- crop(nzland, ref)
+
+
+extent_x = c(min(scores$PC1), max(scores$PC1))
+extent_y = c(min(scores$PC2), max(scores$PC2))
+
 
 ###############################################################
 ## Point map for landcover change of sp 
 ###############################################################
 
-pointPlot_sp <- function(data, # Subset data frame for a species
-                         title # Title of figure
-                         ) {
-  
-  # Extract data
-  data <- data[!is.na(data[, "landCoverChange"]),]
-  data <- data[ - which(data$landCoverChange == "nonPotentialHabitat" | data$landCoverChange == "NF-nonPotentialHabitat"| data$landCoverChange == "nonF-nonPotentialHabitat"| data$landCoverChange == "NF-EF" | data$landCoverChange == "NF-NF" | data$landCoverChange == "nonF-EF" | data$landCoverChange == "nonF-NF"),]
-  
-  # Convert land cover change column to numeric
-  data$changeNo <- NA
-  data[data$landCoverChange == "nonF-nonF", "changeNo"] <- 1
-  data[data$landCoverChange == "NF-nonF", "changeNo"] <- 2
-  
-  # create point object
-  pts <- data[, c("x", "y")]
-  
-  # point coordinate system setting
-  coordinates(pts) <- data[, c("x", "y")]
-  proj4pts <- proj4string(ref)
-  proj4string(pts) <- CRS(proj4pts)
-  
-  # Land cover change column
-  pts$changeNo <- data$changeNo
-  
-  #####################
-  # Plot
-  #####################
-  png(filename = paste("Y:\\landcoverChange_", title, ".png", sep = ""),
-      width = 500, height = 710)
-  par(cex = 0.8)
-  plot(pts,
-       # colour by group and add alpha
-       bg = c(rgb(0, 0, 1, 0.5), rgb(1, 0, 0, 0.5))[pts$changeNo],
-       pch = 21, axes = T,
-       # no outline
-       col = NA,
-       main = paste(title, "\n Number of occurrence cells = ", nrow(data)),
-       cex.main = 1.8,
-       # set extent
-       xlim = extent(ref)[1:2], ylim = extent(ref)[3:4]
+## Plot map for all species of target genus
+chdata$allsp <- ifelse(rowSums(chdata[, spname]) > 0, 1, 0)
+
+map_plot_colourByLandcover("allsp", chdata)
+map_plot_monoColour("allsp", chdata)
+
+## Plot map for a species
+chdata2 <- lapply(spname, function(i){
+  chdata[chdata[,i] == 1,]
+  }
   )
-  # add legend manually
-  legend(x = 1100000, y = 6200000,
-         pch = 21, col = c("red", "blue"), legend = c("Secondary\n open area", "Primary\n open area"),
-         cex = 1.5)
-  
-  # Outline of NZ
-  plot(nzland, add = TRUE)
-  
-  dev.off()
+
+maps <- lapply(1:length(spname), function(i){
+  map_plot_monoColour(spname[i], chdata2[[i]])
+  })
+
+
+###############################################################
+## Plot niche space for landcover change
+###############################################################
+
+## Plot niche space for all species of target genus
+scores$allsp <- ifelse(rowSums(scores[, spname]) > 0, 1, 0)
+
+niche_plot_colourByLandcover("allsp", scores)
+niche_plot_monoColour("allsp", scores)
+
+## Plot niche space for all species of target genus
+scores2 <- lapply(spname, function(i){
+  scores[scores[,i] == 1,]
 }
+)
 
-## all sp
-# extract sp data
-chdataAllsp <- chdata[rowSums(chdata[, spname]) > 0,]
-pointPlot_sp(chdataAllsp, "test Chionochloa")
+pcas <- lapply(1:length(spname), function(i){
+  map_plot_monoColour(spname[i], scores2[[i]])
+})
 
-###############################################################
-## Point map for land cover change of sp 
-###############################################################
-
-chdata2 <- lapply(spname[c(1:16, 18:20, 22:length(spname))], function(i){chadata[chdata[,i]==1,]})
-lapply(c(1:16, 18:20, 22:30,32:length(spname)), function(i){pointPlot_sp(chdata2[[i]], title=spname[i])})
