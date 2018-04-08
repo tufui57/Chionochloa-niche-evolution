@@ -2,7 +2,7 @@
 ### Clade niche overlap/volume
 ###################################################
 
-genus_name <- "Chionochloa"
+genus_name <- "Acaena"
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
 
@@ -35,18 +35,18 @@ agesTipAndNode <- rbind(ages, nodeage)
 ###################################################################
 
 volume <- read.csv(paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
-extractAges <- agesTipAndNode[rownames(agesTipAndNode) %in% volume$node1,]
+extractAges <- agesTipAndNode[rownames(agesTipAndNode) %in% volume$nodeID,]
 
-ageVolData <- cbind(extractAges, volume[order(volume$node1), ])
+ageVolData <- cbind(extractAges, volume[order(volume$nodeID), ])
 
 colnames(ageVolData)[c(1,2,4)] <- c("speciesAge", "spname", "nicheVolume")
 
-write.csv(ageVolData[, c("node1", "spname", "nicheVolume", "speciesAge")], 
+write.csv(ageVolData[, c("nodeID", "spname", "nicheVolume", "speciesAge")], 
           paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
 
-###################################################
+################################################################################
 ### Dataframe of Clade niche overlap & phylogenetic distances
-###################################################
+################################################################################
 
 dis <- data.frame(distance2)
 overlap <- read.csv(paste(".//clade_schoennerD_", genus_tag, ".csv", sep = ""))
@@ -109,12 +109,21 @@ colnames(overlapPdData)[3:4] <- c("nicheOverlap", "phyloDistance")
 overlapPdData <- mutate(overlapPdData, divergenceTime = leng)
 
 # Species name of node
-overlapspnames <- (nodes$nodelabel %in% overlapPdData$node1) %>% rownames(nodes)[.]
+node1name <- sapply(overlapPdData$node1, get_spname_from_nodeID, tree) %>% 
+lapply(., function(x){
+  ifelse(identical(x, character(0)), "NA", x)
+  }
+) %>% unlist
+
+node2name <- sapply(overlapPdData$node2, get_spname_from_nodeID, tree) %>% 
+  lapply(., function(x){
+    ifelse(identical(x, character(0)), "NA", x)
+  }
+  ) %>% unlist
 
 # Add species names
-overlapPdData <- mutate(overlapPdData, node1name = 
-                          c(overlapspnames, rep(NA, nrow(overlapPdData) - length(overlapspnames)))
-)
+overlapPdData <- mutate(overlapPdData, node1name = node1name)
+overlapPdData <- mutate(overlapPdData, node2name = node2name)
 
 # Show sister species list
 for(i in overlapPdData$node1){

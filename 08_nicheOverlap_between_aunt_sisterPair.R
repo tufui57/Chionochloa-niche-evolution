@@ -89,6 +89,6 @@ ancsisOverlapPd$ancestorSisNode <- vapply(ancsisOverlapPd$ancestorSisNode, paste
 ancsisOverlapPd$sisterNodes <- vapply(ancsisOverlapPd$sisterNodes, paste, collapse = ", ", character(1L))
 
 
-write.csv(ancsisOverlapPd[, c("nodes", "sisterNodes", "ancestor", "ancestorSisNode", "nicheOverlap", "divergenceTime")], file = paste(genus_tag, "_aunt_nicheOver.csv", sep = ""))
+write.csv(ancsisOverlapPd[, c("nodes", "sisterNodes", "ancestor", "ancestorSisNode", "nicheOverlap", "divergenceTime")], file = paste(genus_tag, "_parent_aunt_nicheOverlap.csv", sep = ""))
 
 
