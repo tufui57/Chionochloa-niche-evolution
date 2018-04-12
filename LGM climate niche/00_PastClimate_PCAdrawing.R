@@ -16,26 +16,35 @@ time <- #"lig_30s_bio"
 vars <- c(1,6,12,15)
 
 
+genus_name <- "Acaena"
+
+source(".//Chionochloa niche evolution//00_DataPreparation.R")
+
+#load(".//Scores_acaena_landcover.data")
+
 ########################################
 ### Get PCA axes of current climate
 ########################################
 # Data import
-da1 <- read.csv("Y:\\acaena_bioclim_landcover_history_inclNAonland.csv")
+da1 <- read.csv(paste("Y:\\Acaena project\\", genus_name, "_bioclim_landcover_history_inclNAonland.csv", sep = ""))
 d <- da1[is.na(da1$landCoverChange) == F, ]
 
-for(i in sname){
+for(i in spname){
   d[is.na(d[,i]),i] <- 0
 }
 
 # get env. corrdinates (PCA axes)
-pca <- prcomp(d[, paste("bioclim", c(1, 6, 12, 15), sep = "")],
+pca <- prcomp(d[, paste("bioclim", vars, sep = "")],
               center = TRUE,
               scale. = TRUE,
               retx = TRUE
 )
-scores <- data.frame(d[, c(colnames(d)[grep("^bioclim", colnames(d))], sname,
+scores <- data.frame(d[, c(colnames(d)[grep("^bioclim", colnames(d))], spname,
                            "x", "y", "preLandcover", "currentLandcover", "landCoverChange")], pca$x[, 1:2])
 scores$landCoverChange <- factor(scores$landCoverChange)
+
+
+#save(scores, file = ".//Scores_acaena_landcover.data")
 
 ####################################################
 ### Calculate PC values for past climate
@@ -60,7 +69,7 @@ sum(abs(t(pcs)-pca$x))
 
 ### Prepare past climate data
 ## Data import
-pathbio <- paste("Y:\\Niche change of lineages\\WORLDCLIM\\", time, sep = "")
+pathbio <- paste("Y:\\GIS map and Climate data\\worldclim\\", time, sep = "")
 
 files <- list.files(pathbio)
 
@@ -94,7 +103,7 @@ rasters <- rasters[c(1,4,2,3)]
 # Resample raster
 nz <- raster("Y:\\GIS map and Climate data\\worldclim\\bio_411\\bio1_411.bil")
 nzras <- lapply(rasters, resample, nz) %>% 
-  lapply(., crop, extent(c(160,185), c(-50,-30)))
+  lapply(., crop, extent(c(160,185), c(-55,-30))) # Past terrestrial area of Zealandia is different from the one of current NZ
 
 lgmdata <- lapply(nzras, values) %>% do.call(cbind, .)
 
@@ -110,7 +119,21 @@ colnames(newdf) <- paste("PC", 1:4, sep = "")
 
 
 #################################################################################
-# Plot Climatic niche space change from past to the present
+### Find current 1km grid cells within neighbourhood of past available climate niche
+#################################################################################
+
+# how do you decide the distance?
+a = 0.001
+### NOTE; the following takes time circa. half an hour.
+neighbours <- neighbours_within_a_squire(newdf, scores, a = 0.001, coordinateNames = c("PC1", "PC2"))
+
+save(neighbours, file=".//currentNicheSimilarToLGM.data")
+
+mutate(scores,  lgm = lapply(neighbours, nrow) %>% unlist)
+
+
+#################################################################################
+### Plot Climatic niche space change from past to the present
 #################################################################################
 extent_x = c(min(scores$PC1), max(scores$PC1))
 extent_y = c(min(scores$PC2), max(scores$PC2))
