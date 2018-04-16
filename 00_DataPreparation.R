@@ -2,6 +2,7 @@
 ### Libraries and functions
 ########################################################################################
 
+library(phylobase)
 library(phytools)
 library(nichePlot)
 library(dplyr)

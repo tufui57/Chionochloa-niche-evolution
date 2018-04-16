@@ -8,8 +8,11 @@ neighbours_within_a_squire <- function(dat1, # data of points to be searched
                                        a, # half length (unit of the distance is the unit of coordinate) of the squire which you want to count the number of avairable secondary open cells.
                                        coordinateNames # column names for coordinates in dat1 and dat2
                                        ){
+  # Add cell ID to dat2
+  dat2$cellID <- 1:nrow(dat2)
+  
   # Count the number of secondary open cells within squire of the distance "a"
-  dat1_in_dat2area <- lapply(1:nrow(dat2), function(x){
+  dat1_in_dat2area <- lapply(dat2$cellID, function(x){
     
     # Find dat1 points within dat1 point -a <= dat2 point <= dat1 point + a 
     datlat <- dat1[(dat1[, coordinateNames[2]] <= (dat2[x, coordinateNames[2]] + a) & dat1[, coordinateNames[2]] >= (dat2[x, coordinateNames[2]] - a)), ]
@@ -26,9 +29,3 @@ neighbours_within_a_squire <- function(dat1, # data of points to be searched
   
   return(dat1_in_dat2area_dataframe)
 }
-
-dat1 = newdf
-dat2 = scores
-a = 0.001
-coordinateNames = c("PC1", "PC2")
-neighbours_within_a_squire(newdf, scores, a = 0.001, coordinateNames = c("PC1", "PC2"))

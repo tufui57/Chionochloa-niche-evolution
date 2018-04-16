@@ -70,6 +70,7 @@ similar <- apply(sispairs, 1, sisterpair_niche.similarity_test, tree, scores, re
 
 save(similar, file = paste("Y://similaritytest_", genus_name, ".data", sep = ""))
 
+# Display results of similarity test
 for(i in 1:length(similar)){
   # Species node ID
     print(paste("species ID", names(similar)[i]))
@@ -100,3 +101,15 @@ sapply(similar, function(x){
   mean %>% 
   paste("Divergence; Mean p-value over sister sepcies pairs;", .)
 
+
+##############################################################################
+### Test niche overlap between sister pair - their closest clade
+##############################################################################
+
+sisAuntpairs <- sapply(sispairs[,1], get_closestAncestorNode, tree)
+findSisterNode(tree)
+
+
+similar <- apply(sisAuntpairs, 1, sisterpair_niche.similarity_test, tree, scores, rep = 500)
+
+save(similar, file = paste("Y://similaritytest_", genus_name, ".data", sep = ""))
