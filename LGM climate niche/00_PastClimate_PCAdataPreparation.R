@@ -124,9 +124,9 @@ source(".\\Chionochloa niche evolution\\LGM climate niche\\F_nearestNeighbourDis
 # how do you decide the distance?
 a = 0.001
 ### NOTE; the following takes time circa. half an hour.
-neighbours <- neighbours_within_a_squire(newdf, scores, a = 0.001, coordinateNames = c("PC1", "PC2"))
+neighbours <- neighbours_within_a_squire(newdf, scores, a = a, coordinateNames = c("PC1", "PC2"))
 
-save(neighbours, file=".//currentNicheSimilarToLGM130418.data")
+save(neighbours, file = paste(".//currentNicheSimilarToLGM_", a,".data", sep = ""))
 
 
 

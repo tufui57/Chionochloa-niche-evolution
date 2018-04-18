@@ -13,8 +13,10 @@ data <- read.csv(paste("Y:\\Acaena project\\", genus_name, "_bioclim_landcover_1
 
 
 ##############################################################################
-### Test by ecospat
+### Niche similarity test of sister species
 ##############################################################################
+
+## Niche similarity test
 
 niche.similarity_ecospat <-
   function(background,
@@ -40,6 +42,7 @@ niche.similarity_ecospat <-
   }
 
 
+## Test niche similarity of sister species from the node number of one of the sister pair 
 
 sisterpair_niche.similarity_test <- function(sisterpairnode, # vector of node ID pair
          tree,
@@ -70,7 +73,10 @@ similar <- apply(sispairs, 1, sisterpair_niche.similarity_test, tree, scores, re
 
 save(similar, file = paste("Y://similaritytest_", genus_name, ".data", sep = ""))
 
-# Display results of similarity test
+##############################################################################
+## Display results of similarity test
+##############################################################################
+
 for(i in 1:length(similar)){
   # Species node ID
     print(paste("species ID", names(similar)[i]))
@@ -102,14 +108,40 @@ sapply(similar, function(x){
   paste("Divergence; Mean p-value over sister sepcies pairs;", .)
 
 
-##############################################################################
-### Test niche overlap between sister pair - their closest clade
-##############################################################################
 
-sisAuntpairs <- sapply(sispairs[,1], get_closestAncestorNode, tree)
-findSisterNode(tree)
+######################################################################################################
+# Niche overlap test of internal node sister pair (parent and aunt of sister psecies pair)
+######################################################################################################
+
+similarityAunt <- list()
+for(i in sispairs[, 1]){
+  
+  # Get climate data of aunt node
+  auntScore <- get_climatedata_of_auntNode(i, tree, scores)
+  
+  ## Find parent node of target sister species pair
+  ancestor <- tree$edge[which(i == tree$edge[, 2])]
+  # Get climate data of parent node
+  parentScore <- generateClimateDataOfTargetNode(i = ancestor, # Node number
+                                                 tree, # tree object
+                                                 allnodesister, # List of discendant nodes of its sister node
+                                                 scores, nodes, tips)
+  parentScore2 <- parentScore[parentScore$targetClade == 1, ]
+  
+  sim <- niche.similarity_ecospat(scores, "PC1", "PC2", auntScore, parentScore2, R = 500, rep  = 500)
+  sim.div <- niche.similarity_ecospat(scores, "PC1", "PC2", auntScore, parentScore2, alternative = "lower", R = 500, rep = 500)
+  
+  ecospat.plot.overlap.test(sim, "D", "Similarity")
+  ecospat.plot.overlap.test(sim.div, "D", "Similarity")
+  
+  res<-list()
+  res[[1]]<-sim
+  res[[2]]<-sim.div
+  
+  similarityAunt [[i]] <- res
+  
+}
 
 
-similar <- apply(sisAuntpairs, 1, sisterpair_niche.similarity_test, tree, scores, rep = 500)
 
-save(similar, file = paste("Y://similaritytest_", genus_name, ".data", sep = ""))
+save(similarityAunt, file = paste("Y://similaritytest_parent_aunt", genus_name, ".data", sep = ""))
