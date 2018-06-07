@@ -2,10 +2,10 @@
 ### Clade niche overlap/volume
 ###################################################
 
-genus_name <- "Acaena"
+genus_name <- "Chionochloa"
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
-
+load(paste(".//cladePairData_", genus_tag, ".data", sep = ""))
 
 ###################################################
 # Calculate niche overlap between sister clades

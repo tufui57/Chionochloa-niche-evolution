@@ -19,21 +19,36 @@ nodeSp <- sapply(1:(length(tree$edge.length) + 1), count_spRichness, tree = tree
 names(nodeSp) <- 1:(length(tree$edge.length) + 1)
 
 
-ageVolSprich <- mutate(ageVolData, nodeSpRichness = nodeSp[names(nodeSp) %in% ageVolData$node1])
+ageVolSprich <- mutate(ageVolData, nodeSpRichness = nodeSp[names(nodeSp) %in% ageVolData$nodeID])
 
 ageVolSprich <- mutate(ageVolSprich,
                        nicheVolumePerSp = ageVolSprich$nicheVolume/ageVolSprich$nodeSpRichness)
 
-# Compare the following two.
+
+#################################################################################
+### Linear regression
+#################################################################################
+
+##################################################
+### Species age - Persistent occurrence ratio
+##################################################
+
 summary(
   lm(nicheVolume ~ speciesAge + nodeSpRichness, data = ageVolSprich)
 )
 
+myplot <- plotAnalysis(data = ageVolSprich, 
+                       xv = "speciesAge", yv = "nicheVolume", 
+                       nodeNumbercol = "nodeID", showStats = T,
+                       xlabname = "Taxon age", 
+                       ylabname = "Taxon niche volume",
+                       label.point = TRUE,
+                       genus_name = genus_name
+) +
+  ylim(0, 1)
 
-summary(
-  lm(nicheVolumePerSp ~ speciesAge, data = ageVolSprich)
-)
+# save
+ggsave(paste("Y:\\taxonVol_taxonAge_", genus_tag, ".png", sep = ""), plot = myplot,
+       width = 300, height = 210, units = 'mm')
 
-summary(
-  lm(nicheVolume ~ speciesAge, data = ageVolSprich)
-)
+rm(myplot)

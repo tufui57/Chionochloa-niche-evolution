@@ -145,3 +145,34 @@ for(i in sispairs[, 1]){
 
 
 save(similarityAunt, file = paste("Y://similaritytest_parent_aunt", genus_name, ".data", sep = ""))
+
+
+
+load(paste("Y://similaritytest_parent_aunt", genus_name, ".data", sep = ""))
+
+similar <- similarityAunt
+
+# Display mean p values of similarity test
+conservatism <-sapply(similar, function(x){
+  return(x[[1]]$p.D)
+}) %>% 
+  unlist 
+
+conservatism %>%  mean %>% 
+  paste("Conservatism; Mean p-value over sister sepcies pairs;", .)
+
+
+divergence <- sapply(similar, function(x){
+  return(x[[2]]$p.D)
+}) %>%
+  unlist
+
+divergence %>%
+  mean %>% 
+  paste("Divergence; Mean p-value over sister sepcies pairs;", .)
+
+
+write.csv(data.frame(cbind(conservatism, divergence)), file = paste("Y://similaritytest_parent_aunt", genus_name, ".csv", sep = ""))
+
+
+
