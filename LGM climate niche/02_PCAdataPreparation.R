@@ -15,12 +15,14 @@ load( paste(".\\Scores_", genus_tag,"_landcover.data", sep = ""))
 #################################################################################
 source(".\\Chionochloa niche evolution\\LGM climate niche\\F_nearestNeighbourDistance.R")
 
-# Give the size of neighbourhood cells
-a = 0.01
+# The size of neighbourhood cells = a
+
 # How do you decide the size?
-# Calculte how original calimte values would change in a response to PC1 +a and PC2 + a
+# 1. Calculte how original calimte values would change in a response to PC1 +a and PC2 + a
 # Use the following script
 #source(".\\Chionochloa niche evolution\\LGM climate niche\\06_ReversePCvalues_to_originalClimateVlues.R")
+#
+# 2. Calculate ratio of persistent climate generated from a=0.001, 0.005, 0.01, 0.025, 0.05
 
 ### NOTE; the following takes time circa. half an hour.
 # The following function finds past climate cells within a x a squires whose centre is current climate

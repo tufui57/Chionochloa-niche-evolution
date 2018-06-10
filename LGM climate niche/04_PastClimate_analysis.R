@@ -1,3 +1,7 @@
+#################################################################################
+### Habitat and Climate Persistence 
+#################################################################################
+
 ########################################
 ### Data preparation
 ########################################
@@ -23,10 +27,6 @@ time <- #"lig_30s_bio"
 #"bioclim1", "bioclim6", "bioclim12", "bioclim15"
 vars <- c(1,6,12,15)
 
-genus_name <- "Chionochloa"
-
-# Choose LGM neighbourhood cell size
-a = 0.01
 # Load past PCA scores with the LGM neighbourhood data
 load(paste(".//currentNicheSimilarToLGM_", a,".data", sep = ""))
 
@@ -42,6 +42,9 @@ if(genus_name == "Acaena"){
 # Load current PCA scores with land cover change history
 load( paste(".\\Scores_", genus_tag,"_landcover.data", sep = ""))
 
+#################################################################################
+### Habitat and Climate Persistence 
+#################################################################################
 
 # Add cell ID to current PCA scores
 scores$cellID <- 1:nrow(scores)
@@ -52,10 +55,10 @@ scores$cellID <- 1:nrow(scores)
 scoresLGM <- mutate(scores, lgm = ifelse(scores$cellID %in% neighbours$dat2cellID, 1, 0))
 
 # Persistent climate; climate that is shared between LGM and the present. 
-scoresLGM2 <- scoresLGM[scoresLGM$lgm == 1, ]
+persistentClimate <- scoresLGM[scoresLGM$lgm == 1, ]
 
 # Persistent climate of open habitat; persistent climate in primary open habitat
-persistentOpenHabitat <- scoresLGM2[scoresLGM2[,"landCoverChange"] == "nonF-nonF", ] 
+persistentHabitatPersistentClimate <- persistentClimate[persistentClimate[,"landCoverChange"] == "nonF-nonF", ] 
 
 # Primary open habtat
 primary <- scoresLGM[scoresLGM[, "landCoverChange"] == "nonF-nonF", ]
@@ -67,18 +70,18 @@ load(".\\LGM_mainisland_scores.data")
 spname <- grepl(genus_name, colnames(scores)) %>% colnames(scores)[.]
 
 #################################################################################
-### Calculate Persistent occurrence ratio
+### Calculate occurrence ratioin Persistent habitat with persistent climate
 #################################################################################
 
-# Persistent occurrence ratio = species occurrences in persistent climate of open habitat / occurrences in open habitats
+# Persistent occurrence ratio = species occurrences in primary open habitat with persistent climate / occurrences in open habitats
 
 persistent_occurrence_ratio <- function(speciesnumber,
                                         scoresLGM
 ){
-  
+
   spOpenOcc <- scoresLGM[scoresLGM[, spname[speciesnumber]] == 1, ] %>% filter(landCoverChange == "NF-nonF" | landCoverChange == "nonF-nonF" )
   persistentOcc <- filter(spOpenOcc, lgm == 1)
-  
+
   ratio <- nrow(persistentOcc) / nrow(spOpenOcc)
   return(ratio)
 }
@@ -97,41 +100,3 @@ write.csv(persistentRatioAge, file = paste("persistentRatio_age_", genus_tag, ".
 
 
 
-###############################################################
-### Ratio of persistent habitat with persistent climate
-###############################################################
-
-# Number of 1 km cells in land areas of currnet NZ 
-n.nz <- nrow(scores)
-# Number of 1 km cells in land areas of Zealandia in LGM
-n.lgm <- nrow(newdf)
-# Number of 1 km cells in primary open habitat
-n.primary <- nrow(primary)
-# Number of 1 km cells in primary open habitat
-n.secondary <- nrow(scoresLGM[scoresLGM[, "landCoverChange"] == "NF-nonF", ])
-
-# Number of 1 km cells in persistent habitat (primary open) with persitent climate
-n.persistentOpen <- nrow(persistentOpenHabitat)
-# Number of 1 km cells in areas with persistent climate in current NZ
-n.persistent <- nrow(scoresLGM2)
-
-### Ratio
-
-# Ratio of current areas where has persistent climate
-n.persistent/n.nz
-
-# Ratio of areas where has climate that became available after LGM
-(n.nz - n.persistent)/n.nz
-
-# Ratio of current areas where has climate that isn't available now
-(n.lgm - n.persistent)/n.lgm
-
-# Ratio of persistent habitat with persistent climate
-n.persistentOpen / n.primary
-
-# Ratio of persistent habitat with persistent climate among primary open habitat
-n.persistentOpen / n.primary
-
-# Ratio of secondary oepn habitat with persistent climate among secondary open habitat
-persistent2ndaryOpen <- scoresLGM2[scoresLGM2[,"landCoverChange"] == "NF-nonF", ] 
-nrow(persistent2ndaryOpen)/ n.secondary

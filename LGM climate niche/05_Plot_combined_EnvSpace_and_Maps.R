@@ -9,12 +9,21 @@ library(raster)
 library(rgdal)
 library(maptools)
 library(rgeos)
+library(dplyr)
 ########################################
 ### Niche data preparation
 ########################################
 
 genus_name <- "Acaena"
 
+# Create genus tag
+if(genus_name == "Chionochloa"){
+  genus_tag <- "chion"
+}
+
+if(genus_name == "Acaena"){
+  genus_tag <- "acaena"
+}
 
 ########################################
 ### Data preparation
@@ -22,8 +31,12 @@ genus_name <- "Acaena"
 
 load( paste(".\\Scores_", genus_tag,"_landcover.data", sep = ""))
 
-a = 0.001
+a = 0.01
 load(paste(".//currentNicheSimilarToLGM_", a,".data", sep = ""))
+
+# Remove duplicated rows
+notDup <- !(duplicated(neighbours$PC1) & duplicated(neighbours$PC2) & duplicated(neighbours$PC3) & duplicated(neighbours$PC4)) 
+neighbours2 <- neighbours[notDup,]
 
 # Add cell ID
 scores$cellID <- 1:nrow(scores)
@@ -31,7 +44,7 @@ scores$cellID <- 1:nrow(scores)
 # Add availability of climate niche in LGM to current climate data frame
 # neighbours$dat2cellID has "scores" cell ID. SO, rows of "scores" whose cell ID are in "neighbours$dat2cellID"
 
-scoresLGM <- mutate(scores, lgm = ifelse(scores$cellID %in% neighbours$dat2cellID, 1, 0))
+scoresLGM <- mutate(scores, lgm = ifelse(scores$cellID %in% neighbours2$dat2cellID, 1, 0))
 
 # Persistent climate; climate that is shared between LGM and the present. 
 scoresLGM2 <- scoresLGM[scoresLGM$lgm == 1, ]
@@ -72,10 +85,11 @@ nzland2 <- crop(nzland, ref)
 ########################################
 
 niche <- ggplot() +
-  # NZ
-  geom_point(data = scores, aes(PC1, PC2), color = 'gray90') +
+  ### Be careful with the order to overlap points. Should be same as maps
   # LGM climate
   geom_point(data = newdf, aes(PC1, PC2), color = "lightpink") +
+  # NZ
+  geom_point(data = scores, aes(PC1, PC2), color = 'gray90') +
   # Primary open area
   geom_point(data = primary, aes(PC1, PC2), color = "blue") +
   # Persistent open habitat
@@ -124,7 +138,7 @@ map <- ggplot() +
     # title
     name = "",
     breaks = c("Persistent", "Primary"),
-    label = c("Open area with \n persitent climate","Primary open area"),
+    label = c("Persistent open area with \n persitent climate","Primary open area"),
     # colours
     values = c("red", "blue")
   ) +

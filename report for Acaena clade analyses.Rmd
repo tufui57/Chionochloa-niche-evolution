@@ -27,7 +27,7 @@ ageVolData <- read.csv(paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
 # Time since divergence - niche overlap
 overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
 # Proportion of secondary open habitat
-secondaryOpen <- read.csv(paste("Y://", genus_name, "_data_analyses.csv", sep = ""))
+secondaryOpen <- read.csv(paste("Y://Acaena project//", genus_name, "_data_analyses.csv", sep = ""))
 
 ```
 
