@@ -5,8 +5,6 @@ time <- "mrlgmbi_2-5m" # LGM data is 2.5 arc min (4.5km at the equator)
 #"bioclim1", "bioclim6", "bioclim12", "bioclim15"
 vars <- c(1,6,12,15)
 
-genus_name <- "Acaena"
-
 load(".\\LGM_mainisland_scores.data")
 load( paste(".\\Scores_", genus_tag,"_landcover.data", sep = ""))
 

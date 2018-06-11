@@ -16,8 +16,14 @@ source(".//Chionochloa niche evolution//00_PastDataPreparation.R")
 #############################
 # Filter polygons
 #############################
+# crop() can't crop unneccesary polygons out, because the polygons are within the same extent as the main island
+
+proj4stringNZTM <- proj4string(current_ras)
+
+source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F01_Change_resolutionOfWORLDCLIM.R")
+
 # Reference raster
-ref <- raster("Y:\\GIS map and Climate data\\current_landcover1km.bil")
+ref <- raster("Y:\\GIS map and Climate data\\current_landcover5km.bil")
 
 # Outline of NZ
 path = "Y:\\GIS map and Climate data\\lds-nz-coastlines-and-islands-polygons-topo-150k-SHP\\nz-coastlines-and-islands-polygons-topo-150k.shp"
@@ -26,17 +32,9 @@ nzland <- readOGR(path, LAYERS)
 # Crop extent of polygon
 nzland2 <- crop(nzland, ref)
 
-# crop() can't crop unneccesary polygons out, because the polygons are within the same extent as the main island
-
-# Resample raster
-nz <- raster("Y:\\GIS map and Climate data\\worldclim\\bio_411nztm\\bio1_411.bil")
-
-# Project -> resample
-nzras <- lapply(rasters, projectRaster, nz) %>% lapply(., resample, nz) 
-
 # Crop rasters
 # Past terrestrial area of Zealandia is different from the one of current NZ
-nzras2 <- lapply(nzras, crop, 
+nzras2 <- lapply(bioNZ, crop, 
                  extent(extent(nzland2)[1] - 300000, extent(nzland2)[2] + 300000, 
                         extent(nzland2)[3] - 200000, extent(nzland2)[4] + 200000)
 )
