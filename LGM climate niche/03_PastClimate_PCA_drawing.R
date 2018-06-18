@@ -17,6 +17,12 @@ time <- #"lig_30s_bio"
   "mrlgmbi_2-5m" # LGM data is 2.5 arc min (4.5km at the equator)
 #"ccmidbi_30s"
 
+# Resolution of rasters
+reso = 5
+
+# Worldclim version
+worldclim=1
+
 ### Choose bioclim variables. Use the following bioclim variables to draw PCA.
 #"bioclim1", "bioclim6", "bioclim12", "bioclim15"
 vars <- c(1,6,12,15)
@@ -36,10 +42,16 @@ if(genus_name == "Acaena"){
 ### Data preparation
 ########################################
 
-load( paste(".\\Scores_", genus_tag,"_landcover.data", sep = ""))
+# LGM climate
+load(paste(".\\LGM_mainisland_worldclim",
+           worldclim, "_", reso, "km_scores.data", sep = "")
+)
+# Current climate
+load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
+           worldclim, "_", reso, "km.data", sep = ""))
 
-a = 0.001
-load(paste(".//currentNicheSimilarToLGM_", a,".data", sep = ""))
+# Persistent climate
+load(paste(".//currentNicheSimilarToLGM_", a,"_", reso, "km.data", sep = ""))
 
 # Add cell ID
 scores$cellID <- 1:nrow(scores)
@@ -58,8 +70,6 @@ persistentOpenHabitat <- scoresLGM2[scoresLGM2[,"landCoverChange"] == "nonF-nonF
 # Primary open habtat
 primary <- scoresLGM[scoresLGM[, "landCoverChange"] == "nonF-nonF", ]
 
-# Load LGM climate scores
-load(".\\LGM_mainisland_scores.data")
 
 #################################################################################
 ### Plot Climate space
@@ -71,10 +81,10 @@ load(".\\LGM_mainisland_scores.data")
 pMain <- ggplot() +
   # plot all NZ data points
   geom_point(data = scores, aes(PC1, PC2), color = 'gray80', alpha = 0.25) +
-  geom_point(data = newdf, aes(PC1, PC2), color = 'red', alpha = 0.25) +
+  geom_point(data = newdf, aes(PC1, PC2), color = 'lightpink', alpha = 0.25) +
   ggtitle("LGM")
 
-ggsave(paste(time, "_and_current.png", sep = ""), pMain)
+ggsave(paste("Y://",time, "_and_current.png", sep = ""), pMain, width = 100, height = 80, units = "mm")
 
 #################################
 ### Plot persisitent Climate
@@ -82,10 +92,10 @@ ggsave(paste(time, "_and_current.png", sep = ""), pMain)
 pMain <- ggplot() +
   # plot all NZ data points
   geom_point(data = scores, aes(PC1, PC2), color = 'gray80', alpha = 0.25) +
-  geom_point(data = scoresLGM2, aes(PC1, PC2), color = 'red', alpha = 0.25) +
-  ggtitle("LGM")
+  geom_point(data = scoresLGM2, aes(PC1, PC2), color = 'yellow', alpha = 0.25) +
+  ggtitle("Persistent")
 
-ggsave(paste(time, "_persistentClimate.png", sep = ""), pMain)
+ggsave(paste("Y://", time, "_persistentClimate.png", sep = ""), pMain, width = 100, height = 80, units = "mm")
 
 ##################################################################
 ### Plot primary open habitat and LGM climate space 
@@ -95,9 +105,10 @@ p <- ggplot() +
   # plot all NZ data points
   geom_point(data = scores, aes(PC1, PC2), color = 'gray80', alpha = 0.25) +
   # point of each sp
-  geom_point(data = primary, aes(PC1, PC2), color = 'blue', alpha = 0.05)
+  geom_point(data = primary, aes(PC1, PC2), color = 'brown', alpha = 0.05) +
+  ggtitle("Primary open habitat")
 
-ggsave("primaryOpenHabitat.png", p)
+ggsave(paste("Y://", time, "_primaryOpenHabitat.png", sep = ""), p, width = 100, height = 80, units = "mm")
 
 ##################################################################
 ### Plot persistent climate space Where has been available since LGM 
@@ -109,4 +120,4 @@ p2 <- ggplot() +
   geom_point(data = persistentOpenHabitat, aes(PC1, PC2), color = 'red', alpha = 0.25) +
   ggtitle("Persistent climate of open habitat")
 
-ggsave(paste(time, "_persistentOpenHabitat.png", sep = ""), p2)
+ggsave(paste("Y://", time, "_persistentOpenHabitat.png", sep = ""), p2, width = 100, height = 80, units = "mm")

@@ -6,7 +6,7 @@
 ### Data preparation
 ##############################################################################
 
-# genus_name <- "Acaena"
+genus_name <- "Acaena"
 genus_name <- "Chionochloa"
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
@@ -30,7 +30,7 @@ ageVolSprich <- mutate(ageVolSprich,
 #################################################################################
 
 ##################################################
-### Species age - Persistent occurrence ratio
+### Species age - Niche volume
 ##################################################
 
 summary(

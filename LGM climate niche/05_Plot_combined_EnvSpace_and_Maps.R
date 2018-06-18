@@ -1,6 +1,7 @@
 #################################################################################
 ### Plot map and PCA of persistent climate of open habitat
 #################################################################################
+
 library(ggplot2)
 library(gridExtra)
 library(extrafont)
@@ -10,11 +11,12 @@ library(rgdal)
 library(maptools)
 library(rgeos)
 library(dplyr)
+
 ########################################
 ### Niche data preparation
 ########################################
 
-genus_name <- "Acaena"
+genus_name <- "Chionochloa"
 
 # Create genus tag
 if(genus_name == "Chionochloa"){
@@ -28,11 +30,14 @@ if(genus_name == "Acaena"){
 ########################################
 ### Data preparation
 ########################################
+load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
+           worldclim, "_", reso, "km.data", sep = ""
+)
+)
 
-load( paste(".\\Scores_", genus_tag,"_landcover.data", sep = ""))
-
-a = 0.01
-load(paste(".//currentNicheSimilarToLGM_", a,".data", sep = ""))
+# Set neighbourhood cell size
+a = 0.045
+load(paste(".//currentNicheSimilarToLGM_", a,"_", genus_tag, "_", reso, "km.data", sep = ""))
 
 # Remove duplicated rows
 notDup <- !(duplicated(neighbours$PC1) & duplicated(neighbours$PC2) & duplicated(neighbours$PC3) & duplicated(neighbours$PC4)) 
@@ -56,8 +61,8 @@ persistentOpenHabitat <- scoresLGM2[scoresLGM2[,"landCoverChange"] == "nonF-nonF
 primary <- scoresLGM[scoresLGM[, "landCoverChange"] == "nonF-nonF", ]
 
 # Load LGM climate scores
-load(".\\LGM_mainisland_scores.data")
-
+load(paste(".\\LGM_mainisland_worldclim",
+           worldclim, "_", reso, "km_scores.data", sep = ""))
 # Extents
 extent_x = c(min(scores$PC1), max(scores$PC1))
 extent_y = c(min(scores$PC2), max(scores$PC2))
@@ -67,10 +72,12 @@ extent_y = c(min(scores$PC2), max(scores$PC2))
 ###############################################################
 
 # Data import
-d <- read.csv(paste("Y:\\Acaena project\\", genus_name,"_bioclim_landcover_history_inclNAonland.csv", sep = ""))
+d <- read.csv(paste("Y://", genus_name, "_bioclim_landcover_history_worldclim",
+                    worldclim, "_", reso, "km.csv", sep=""
+))
 
 # Reference raster
-ref <- raster("Y:\\GIS map and Climate data\\current_landcover1km.bil")
+ref <- raster(paste("Y:\\GIS map and Climate data\\current_landcover", reso, "km.bil", sep = ""))
 
 # Outline of NZ
 path = "Y:\\GIS map and Climate data\\lds-nz-coastlines-and-islands-polygons-topo-150k-SHP\\nz-coastlines-and-islands-polygons-topo-150k.shp"
@@ -91,7 +98,7 @@ niche <- ggplot() +
   # NZ
   geom_point(data = scores, aes(PC1, PC2), color = 'gray90') +
   # Primary open area
-  geom_point(data = primary, aes(PC1, PC2), color = "blue") +
+  geom_point(data = primary, aes(PC1, PC2), color = "brown") +
   # Persistent open habitat
   geom_point(data = persistentOpenHabitat, aes(PC1, PC2), color = "red") +
   # extent
@@ -114,8 +121,7 @@ niche <- ggplot() +
 primary$changeNo <- NA
 primary[primary$lgm == 1, "changeNo"] <- "Persistent"
 primary[primary$lgm == 0, "changeNo"] <- "Primary"
-primary[primary$lgm == 1, "size"] <- 0.001
-primary[primary$lgm == 0, "size"] <- 0.1
+
 
 ###############################################################
 # Prepare a polygon of LGM terrestrial area
@@ -140,7 +146,7 @@ map <- ggplot() +
     breaks = c("Persistent", "Primary"),
     label = c("Persistent open area with \n persitent climate","Primary open area"),
     # colours
-    values = c("red", "blue")
+    values = c("red", "brown")
   ) +
   guides(colour = guide_legend(override.aes = list(size = 5, shape=16, alpha=0.7))) +
   labs(x="", y="") +
@@ -156,7 +162,8 @@ map <- ggplot() +
         axis.ticks.y = element_blank()
   )
 
-png("Y://Persistent_niche_map.png", width = 1200, height = 650)
+png(paste("Y://Persistent_niche_map_worldclim", worldclim, "_", reso, "km.png", sep=""),
+    width = 1200, height = 650)
 grid.arrange(map, niche, ncol = 2, widths = c(3,5))
 dev.off()
 
@@ -164,7 +171,7 @@ dev.off()
 # ggplot points can't be as small as you want.
 
 ras.persistent.open <- rasterFromXYZ(primary[,c("x", "y","lgm")]) 
-plot(ras.persistent.open, col=c("red", "blue"))
+plot(ras.persistent.open, col=c("red", "brown"))
 
 # But the raster plot still looks similar to point ggplot.
 

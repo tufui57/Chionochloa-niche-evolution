@@ -7,10 +7,19 @@ library(SDMTools)
 genus_name <- "Acaena"
 
 # Give raster resolution (km)
-reso <- 5
+reso <- 1
 
+Worldclim <- 1
 # Give path of WORLDCLIM raster
-path <- "Y:\\GIS map and Climate data\\worldclim\\wc2.0_2.5m_bio"
+if(Worldclim == 1){
+
+  # Worldclim ver.1.4
+  path <-"Y:\\GIS map and Climate data\\worldclim\\bio_411"
+}
+if(Worldclim == 2){
+ # Worldclim ver.2
+  path <- "Y:\\GIS map and Climate data\\worldclim\\wc2.0_2.5m_bio"
+}
 
 
 # ############################################################################################################
@@ -23,21 +32,13 @@ path <- "Y:\\GIS map and Climate data\\worldclim\\wc2.0_2.5m_bio"
 # # But it works just for reference.
 # ref.raster <- aggregate(pre, fun = modal, na.rm = T, fact = reso*10)
 # 
+# if(file.exists(paste("Y:\\GIS map and Climate data\\pre-human_landcover", reso, "km.bil", sep="")) == FALSE){
 # writeRaster(ref.raster, paste("Y:\\GIS map and Climate data\\pre-human_landcover", reso, "km.bil", sep=""), format = "EHdr")
-
+#   }
 ref.raster <- raster(
   paste("Y:\\GIS map and Climate data\\pre-human_landcover", reso,"km.bil", sep=""
         )
   )
-
-############################################################################################################
-# Convert WORLDCLIM tiff to raster
-# Project coordinate system of bioclim rasters from WGS84 to NZTM
-############################################################################################################
-
-proj4stringNZTM <- proj4string(current_ras)
-
-source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F01_Change_resolutionOfWORLDCLIM.R")
 
 ############################################################################################################
 # Resample current land cover polygon to raster at resolution 5km
@@ -49,22 +50,34 @@ source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis/
 # 
 pre <- ref.raster
 # current_ras <- rasterize(current, pre, "Class_2012")
+# resample(current_ras, pre)
 # 
 # classnames <- cbind(unique(current$Class_2012), levels(current$Name_2012))
 # 
-# writeRaster(current_ras, "Y:\\GIS map and Climate data\\current_landcover5km.bil", format = "EHdr")
+# if(file.exists(paste("Y:\\GIS map and Climate data\\current_landcover", reso, "km.bil", sep="")) == FALSE){
+#   writeRaster(current_ras, paste("Y:\\GIS map and Climate data\\current_landcover", reso, "km.bil", sep=""), format = "EHdr")
+# 
+# }
 
 current_ras <- raster(
-  paste("Y:\\GIS map and Climate data\\current_landcover", reso,"km.bil", sep=""
+  paste("Y:\\GIS map and Climate data\\current_landcover", reso, "km.bil", sep=""
   )
 )
+############################################################################################################
+# Convert WORLDCLIM tiff to raster
+# Project coordinate system of bioclim rasters from WGS84 to NZTM
+############################################################################################################
+
+proj4stringNZTM <- proj4string(current_ras)
+
+source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F01_project_resample_WORLDCLIM.R")
 
 ############################################################################################################
 # Resample species occurrence raster on 1km to 5km resolution 
 ############################################################################################################
 
-# Import Acaena occurrence data
-source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F02_Change_resolutionOfWORLDCLIM.R")
+# Import species occurrence data
+source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F02_clean_up_species_records.R")
 
 ### Get rid of species whose occurren resords < 5
 dat2 <- dat[sapply(dat, nrow) >= 5]
@@ -105,21 +118,18 @@ bio_land <- stack(c(bioNZ, spRaster, pre, current_ras))
 
 res <- data.frame(cbind(coordinates(bio_land[[1]]), values(bio_land)))
 
-write.csv(res, paste("Y:\\Acaena project\\", genus_name, "_bioclim_landcover_", reso,"km.bil", sep=""
-                     )
-          )
-
 ############################################################################################################
 # Create land cover history
 ############################################################################################################
 
-source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F03_Change_resolutionOfWORLDCLIM.R")
+source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F03_convert_landcoverChange.R")
 
 d <- landCoverChange(res, prehuman_landcover="layer.1", current_landcover="layer.2")
 
 # Delete NA rows of BIOCLIM data
 d2 <- d[!is.na(d$bioclim1), ]
 
-write.csv(d2, file = paste("Y://", genus_name, "_bioclim_landcover_history", reso, "km.csv", sep=""
+write.csv(d2, file = paste("Y://", genus_name, "_bioclim_landcover_history_worldclim",
+                           Worldclim, "_", reso, "km.csv", sep=""
                            )
           )

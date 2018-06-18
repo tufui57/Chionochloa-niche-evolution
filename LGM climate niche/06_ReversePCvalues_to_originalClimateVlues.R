@@ -8,7 +8,9 @@
 
 ### Climate data import
 
-da1 <- read.csv(paste("Y:\\Acaena project\\", genus_name, "_bioclim_landcover_history_inclNAonland.csv", sep = ""))
+da1 <- read.csv(paste("Y://", genus_name, "_bioclim_landcover_history_worldclim",
+                                        Worldclim, "_", reso, "km.csv", sep=""
+))
 d <- da1[is.na(da1$landCoverChange) == F, ]
 
 spname <- grepl(genus_name, colnames(d)) %>% colnames(d)[.]

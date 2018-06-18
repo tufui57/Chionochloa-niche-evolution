@@ -1,5 +1,5 @@
 
-genus_name <- "Chionochloa"
+genus_name <- "Acaena"
 
 library(dismo)
 
@@ -35,39 +35,43 @@ for(i in sispairs[,1]){
   probD[[i]] <- nicheOverlap(prob1[[1]], prob2[[1]], stat = 'D', mask = TRUE, checkNegatives = TRUE)
 }
 
-
-
-############################################################################################################
-##### Compare Schoenner's D from probability and the one from occurrence records
-############################################################################################################
-
 # Import data
 overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
 
 ### Node numbers of sister species pairs
 sisOverlapPd <- (overlapPdData$node1 %in% sispairs[,1]) %>% overlapPdData[., ]
+# Acaena
+if(genus_name == "Acaena"){
+  pro <- unlist(probD)
+}
+# Chionochloa 
+if(genus_name == "Chionochloa"){
+  pro <- unlist(probD)[-length(unlist(probD))]
+}
+overlaps <- cbind(sisOverlapPd, pro)
+colnames(overlaps)[colnames(overlaps) == "pro"] <- "potentialNicheOverlap"
 
-overlaps <- cbind(sisOverlapPd, unlist(probD))
-colnames(overlaps)[ncol(overlaps)] <- "probD"
-
+############################################################################################################
+##### Compare Schoenner's D from probability and the one from occurrence records
+############################################################################################################
 
 m <- lm(probD ~ nicheOverlap, overlaps)
 myplot <- plotAnalysis(data = overlaps,
+                       genus_name = genus_name,
                        xv = "nicheOverlap", yv = "probD", 
                        nodeNumbercol = "node1", showStats = T,
-                       genus_name = genus_name,
                        xlabname = "Niche overlap of occurrence records", ylabname = "Niche overlap of model prediction"
 )
 
 # save
-ggsave(paste("Y:\\sister_nicheoverlap_chion.png", sep = ""), plot = myplot,
+ggsave(paste("Y:\\Comparison_sister_nicheoverlap_", genus_tag, ".png", sep = ""), plot = myplot,
        width = 300, height = 210, units = 'mm')
 
 rm(myplot)
 
 
 #########################################################################
-### Sister species pairs' Phylogenetic distances ~ niche overlap of predictions
+### Sister species pairs' niche overlap of predictions ~ divergence time
 #########################################################################
 
 myplot <- plotAnalysis(data = overlaps,
@@ -78,8 +82,9 @@ myplot <- plotAnalysis(data = overlaps,
 )
 
 # save
-ggsave(paste("Y:\\sister_predNicheoverlap_phyloDistance_chion.png", sep = ""), plot = myplot,
+ggsave(paste("Y:\\sister_predNicheoverlap_phyloDistance_", genus_tag, ".png", sep = ""), plot = myplot,
        width = 300, height = 210, units = 'mm')
 
 rm(myplot)
+
 

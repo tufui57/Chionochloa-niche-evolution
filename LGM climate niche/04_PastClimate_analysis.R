@@ -18,6 +18,7 @@ library(rgeos)
 
 source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
 
+Worldclim <- 1
 # Choose past data
 time <- #"lig_30s_bio"
   "mrlgmbi_2-5m" # LGM data is 2.5 arc min (4.5km at the equator)
@@ -28,7 +29,7 @@ time <- #"lig_30s_bio"
 vars <- c(1,6,12,15)
 
 # Load past PCA scores with the LGM neighbourhood data
-load(paste(".//currentNicheSimilarToLGM_", a,".data", sep = ""))
+load( paste(".//currentNicheSimilarToLGM_", a,"_", reso, "km.data", sep = ""))
 
 # Create genus tag
 if(genus_name == "Chionochloa"){
@@ -40,8 +41,15 @@ if(genus_name == "Acaena"){
 }
 
 # Load current PCA scores with land cover change history
-load( paste(".\\Scores_", genus_tag,"_landcover.data", sep = ""))
+load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
+           Worldclim, "_", reso, "km.data", sep = ""
+)
+)
 
+# Load LGM PCA scores
+load(paste(".\\LGM_mainisland_worldclim",
+           Worldclim, "_", reso, "km_scores.data", sep = "")
+)
 #################################################################################
 ### Habitat and Climate Persistence 
 #################################################################################
@@ -62,9 +70,6 @@ persistentHabitatPersistentClimate <- persistentClimate[persistentClimate[,"land
 
 # Primary open habtat
 primary <- scoresLGM[scoresLGM[, "landCoverChange"] == "nonF-nonF", ]
-
-# Load LGM climate scores
-load(".\\LGM_mainisland_scores.data")
 
 # Species name
 spname <- grepl(genus_name, colnames(scores)) %>% colnames(scores)[.]
@@ -96,7 +101,7 @@ persistentRatioAge <- merge(persistentRatioData, ageVolData, by = "spname")
 
 persistentRatioAge <- mutate(persistentRatioAge, persistentRatio = as.numeric(as.character(persistentRatioAge$persistentRatio)))
 
-write.csv(persistentRatioAge, file = paste("persistentRatio_age_", genus_tag, ".csv", sep = ""))
+write.csv(persistentRatioAge, file = paste("persistentRatio_age_", genus_tag, reso, "km", a, ".csv", sep = ""))
 
 
 

@@ -12,7 +12,9 @@ library(maptools)
 library(rgeos)
 
 # Data import
-d1 <- read.csv(paste("Y:\\Acaena project\\", genus_name,"_bioclim_landcover_1km.csv", sep = ""))
+d1 <- read.csv(paste("Y://", genus_name, "_bioclim_landcover_history_worldclim",
+                                                   Worldclim, "_", reso, "km.csv", sep="")
+               )
 
 d <- d1[!is.na(d1$bioclim1), ]
 

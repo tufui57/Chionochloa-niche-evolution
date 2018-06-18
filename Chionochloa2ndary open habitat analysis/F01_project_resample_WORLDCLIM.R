@@ -9,17 +9,19 @@ files <- paste(path,
                sep="\\"
 )
 
-bio <- lapply(files[grep("tif$", files)], raster)
-
 ### Worldclim 1.4
 if(files[grep("bil$", files)] %>% length != 0){
+  # Import worldclim
+  bio <- lapply(files[grep("bil$", files)], raster)
+  
   # Change names to match occurrence data columns
 nam <- sapply(sapply(files[grep("bil$", files)], strsplit, "\\\\|.bil"), "[[", 5)
 nam2 <- gsub("_411", "", gsub("bio", "bioclim", nam))
 names(bio) <- nam2
 
 }else{
-
+  # Import worldclim
+  bio <- lapply(files[grep("tif$", files)], raster)
 ### Worldclim 2
   fil <- sapply(sapply(files[grep("tif$", files)], strsplit, "\\\\|.tif"), "[[", 5)
   nam <- sapply(strsplit(fil, "_"), "[[", 4) %>% gsub("^0", "", .)
