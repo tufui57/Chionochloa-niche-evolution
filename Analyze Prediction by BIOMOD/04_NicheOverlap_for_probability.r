@@ -1,5 +1,5 @@
 
-genus_name <- "Chionochloa"
+genus_name <- "Acaena"
 
 library(dismo)
 
@@ -23,39 +23,41 @@ get_BIOMOD_probability_by_nodeID <- function(i # node ID number
 ### Get Schoenner's D between two species occurrence probability
 ####################################################################
 
-# # Extract probability by node number
-# probD <- list()
-# 
-# for(i in sispairs[,1]){
-#   
-#   prob1 <- get_BIOMOD_probability_by_nodeID(i)
-#   prob2 <- get_BIOMOD_probability_by_nodeID(allnodesister[[i]])
-#   
-#   ### Use dismo::nicheOverlap
-#   probD[[i]] <- nicheOverlap(prob1[[1]], prob2[[1]], stat = 'D', mask = TRUE, checkNegatives = TRUE)
-# }
-# 
-# # Import data
-# overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
-# 
-# ### Node numbers of sister species pairs
-# sisOverlapPd <- (overlapPdData$node1 %in% sispairs[,1]) %>% overlapPdData[., ]
-# # Acaena
-# if(genus_name == "Acaena"){
-#   pro <- unlist(probD)
-# }
-# # Chionochloa 
-# if(genus_name == "Chionochloa"){
-#   pro <- unlist(probD)[-length(unlist(probD))]
-# }
-# overlaps <- cbind(sisOverlapPd, pro)
-# colnames(overlaps)[colnames(overlaps) == "pro"] <- "potentialNicheOverlap"
-# 
-# write.csv(paste("Nicheovrlap_potential_actual_", genus_tag, ".csv", sep = ""))
+# Extract probability by node number
+probD <- list()
+
+for(i in sispairs[,1]){
+
+  prob1 <- get_BIOMOD_probability_by_nodeID(i)
+  prob2 <- get_BIOMOD_probability_by_nodeID(allnodesister[[i]])
+
+  ### Use dismo::nicheOverlap
+  probD[[i]] <- nicheOverlap(prob1[[1]], prob2[[1]], stat = 'D', mask = TRUE, checkNegatives = TRUE)
+}
+
+# Import data
+overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
+
+### Node numbers of sister species pairs
+sisOverlapPd <- (overlapPdData$node1 %in% sispairs[,1]) %>% overlapPdData[., ]
+# Acaena
+if(genus_name == "Acaena"){
+  pro <- unlist(probD)
+}
+# Chionochloa
+if(genus_name == "Chionochloa"){
+  pro <- unlist(probD)[-length(unlist(probD))]
+}
+overlaps <- cbind(sisOverlapPd, pro)
+colnames(overlaps)[colnames(overlaps) == "pro"] <- "potentialNicheOverlap"
+
+write.csv(overlaps, paste("Nicheovrlap_potential_actual_", genus_tag, ".csv", sep = ""))
 
 ############################################################################################################
 ##### Compare Schoenner's D from probability and the one from occurrence records
 ############################################################################################################
+
+overlaps <- read.csv(paste("Nicheovrlap_potential_actual_", genus_tag, ".csv", sep = ""))
 
 m <- lm(potentialNicheOverlap ~ nicheOverlap, overlaps)
 myplot <- plotAnalysis(data = overlaps,
@@ -78,10 +80,10 @@ rm(myplot)
 #########################################################################
 
 myplot <- plotAnalysis(data = overlaps,
-                       yv = "divergenceTime", xv = "potentialNicheOverlap", 
+                       xv = "divergenceTime", yv = "potentialNicheOverlap", 
                        nodeNumbercol = "node1", showStats = T,
                        genus_name = genus_name,
-                       ylabname = "Divergence Time", xlabname = "Potential niche overlap"
+                       xlabname = "Divergence Time", ylabname = "Potential niche overlap"
 )+
   theme(text = element_text(size=10))
 
