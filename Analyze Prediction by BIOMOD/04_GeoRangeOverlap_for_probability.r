@@ -20,7 +20,7 @@ get_BIOMOD_probability_by_nodeID <- function(i # node ID number
 }
 
 ####################################################################
-### Get Schoenner's D between two species occurrence probability
+### Potential range overlap between sister species
 ####################################################################
 
 # Extract probability by node number
@@ -54,7 +54,7 @@ colnames(overlaps)[colnames(overlaps) == "pro"] <- "potentialNicheOverlap"
 write.csv(overlaps, paste("Nicheovrlap_potential_actual_", genus_tag, ".csv", sep = ""))
 
 ############################################################################################################
-##### Compare Schoenner's D from probability and the one from occurrence records
+##### Potential range overlap ~ actual niche overlap between sister species
 ############################################################################################################
 
 overlaps <- read.csv(paste("Nicheovrlap_potential_actual_", genus_tag, ".csv", sep = ""))
@@ -76,7 +76,7 @@ rm(myplot)
 
 
 #########################################################################
-### Sister species pairs' niche overlap of predictions ~ divergence time
+### potetntial range overlap between Sister species ~ divergence time
 #########################################################################
 
 myplot <- plotAnalysis(data = overlaps,

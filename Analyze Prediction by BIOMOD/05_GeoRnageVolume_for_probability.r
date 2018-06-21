@@ -1,3 +1,6 @@
+######################################################################################################
+### Calculate geographical potential range overlap between sister sepcies
+######################################################################################################
 
 genus_name <- "Chionochloa"
 
@@ -9,14 +12,14 @@ source(".//Chionochloa niche evolution//00_DataPreparation.R")
 load(paste("Y://ensemblePrediction_", genus_tag, ".data", sep = ""))
 
 ####################################################################
-### Potential niche volume
+### Potential range volume
 ####################################################################
 
 # Import actual niche volume
-actualvol <- read.csv(paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
+actualvol <- read.csv(paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
 
 # Create imaginary speices occurring at all cells in NZ
-probAll <- pred[[1]]
+probAll <- pred[1]
 values(probAll[[1]]) <- ifelse(is.na(values(probAll[[1]])), NA, 1000)
 
 # Calculate niche volume
@@ -40,35 +43,54 @@ for(i in spname){
 }
 
 
-### Get vector of potential niche values
+### Get vector of potential range values
 volumed <- as.numeric(as.character(vold))
 volumei <- as.numeric(as.character(voli))
 
 vols <- merge(actualvol, data.frame(cbind(spname, volumed, volumei)), by ="spname")
 
-colnames(vols)[colnames(vols) == "volumed"] <- "potentialNicheVolume.D"
-colnames(vols)[colnames(vols) == "volumei"] <- "potentialNicheVolume.I"
+colnames(vols)[colnames(vols) == "volumed"] <- "potentialRangeVolume.D"
+colnames(vols)[colnames(vols) == "volumei"] <- "potentialRnageVolume.I"
 
 # Save the data
 write.csv(vols, paste("NicheVolume_potential_actual_", genus_tag, ".csv", sep = ""))
 
-
 #########################################################################
-### Niche volume of predictions ~ species age
+### Potential range ~ species age
 #########################################################################
 
 vols <- read.csv(paste("NicheVolume_potential_actual_", genus_tag, ".csv", sep = ""))
 
 myplot <- plotAnalysis(data = vols,
-                       yv = "potentialNicheVolume.I", xv = "", 
-                       nodeNumbercol = "node1", showStats = T,
                        genus_name = genus_name,
-                       ylabname = "Species age", xlabname = "Niche volume of model prediction"
-)
+                       xv = "speciesAge", yv = "potentialNicheVolume.I", 
+                       nodeNumbercol = "node1", showStats = T,
+                       xlabname = "Species age", ylabname = "Potential niche volume"
+) +
+  theme(text = element_text(size=10))
 
 # save
-ggsave(paste("Y:\\potential_nicheVolume_speciesAge_", genus_tag, ".png", sep = ""), plot = myplot,
-       width = 300, height = 210, units = 'mm')
+ggsave(paste("Y:\\predNicheVolume_speciesAge_", genus_tag, ".png", sep = ""), plot = myplot,
+       width = 100, height = 80, units = "mm")
+
+rm(myplot)
+
+############################################################################################################
+##### Compare potential range and actual niche volume
+############################################################################################################
+
+myplot <- plotAnalysis(data = vols,
+                       xv = "ecospat.corrected.I", yv = "potentialNicheVolume.I", 
+                       nodeNumbercol = "node1", showStats = T,
+                       genus_name = genus_name,
+                       xlabname = "Actual niche volume", ylabname = "Potential niche volume"
+)+
+  theme(text = element_text(size=10))
+
+
+# save
+ggsave(paste("Y:\\nicheVolume_potential_actual_", genus_tag, ".png", sep = ""), plot = myplot,
+       width = 100, height = 80, units = 'mm')
 
 rm(myplot)
 
