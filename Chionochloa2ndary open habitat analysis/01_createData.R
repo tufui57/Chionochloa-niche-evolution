@@ -85,28 +85,13 @@ dat2 <- dat[sapply(dat, nrow) >= 5]
 # Import reference raster of WGS
 refWGS <- raster("Y:\\GIS map and Climate data\\worldclim\\bio_411\\bio1_411.bil")
 
-raster_conversion_and_extractBIOCLIM <- function(data){
-  
-  # Extract target species occurrence records
-  points <- data[,c("lon","lat")]
-  # Set coordinates
-  coordinates(points) <- data[,c("lon","lat")]
-  # Put values in point object
-  points$sp <- rep(1,nrow(data))
-  proj4string(points) <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"
-  sp_raster <- rasterize(points, refWGS, field = 1)
-  
-  # project raster from WGS84 to NZTM
-  projected_raster <- projectRaster(sp_raster, crs = proj4stringNZTM)
-  
+# Import function
+source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F04_convert_occurrencePoints_to_raster.R")
+
+spRaster <- lapply(dat2, convert_occurrencePoints_to_raster, refWGS = refWGS) %>% 
   # Resample raster from "arc" to "reso" km.
   # Raster projection from WGS to NZTM doesn't make raster at the desired resolution, because 30sec in NZ is NOT 1km.
-  projected_raster2 <- resample(projected_raster, current_ras, method="ngb")
-  
-  return(projected_raster2)
-}
-
-spRaster <- lapply(dat2, raster_conversion_and_extractBIOCLIM)
+  lapply(., resample, current_ras, method="ngb")
 
 
 ############################################################################################################

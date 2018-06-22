@@ -20,8 +20,10 @@ load(paste("Y://ensemblePrediction_", genus_tag, ".data", sep = ""))
 actualvol <- read.csv(paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
 
 # Create imaginary speices occurring at all cells in NZ
-probAll <- pred[1]
-values(probAll[[1]]) <- ifelse(is.na(values(probAll[[1]])), NA, 1000)
+prob1 <- get_occurrenceProbability_to_scores(i)
+ras1 <- raster_from_dataframe(prob1)
+rasall <- ras1
+values(rasall) <- ifelse(is.na(values(ras1)), NA, 1000)
 
 # Calculate niche volume
 vold <- list()
@@ -29,14 +31,15 @@ voli <- list()
 
 for(i in spname){
   
-  # Get probability of the species
-  prob1 <- pred[names(pred) == gsub("_",".", i)]
+  prob1 <- get_occurrenceProbability_to_scores(i)
   
-  ### Use dismo::nicheOverlap
+  # dismo::nicheOverlap() requires raster of probability
+  rassp <- raster_from_dataframe(prob1)
+  
   tryCatch(
   {
-    vold[[i]] <- nicheOverlap(prob1[[1]], probAll[[1]], stat = 'D', mask = TRUE, checkNegatives = TRUE)
-    voli[[i]] <- nicheOverlap(prob1[[1]], probAll[[1]], stat = 'I', mask = TRUE, checkNegatives = TRUE)
+    vold[[i]] <- nicheOverlap(rassp, rasall, stat = 'D', mask = TRUE, checkNegatives = TRUE)
+    voli[[i]] <- nicheOverlap(rassp, rasall, stat = 'I', mask = TRUE, checkNegatives = TRUE)
   }
   ,
   error = function(e) print(i)
@@ -50,8 +53,8 @@ volumei <- as.numeric(as.character(voli))
 
 vols <- merge(actualvol, data.frame(cbind(spname, volumed, volumei)), by ="spname")
 
-colnames(vols)[colnames(vols) == "volumed"] <- "potentialRangeVolume.D"
-colnames(vols)[colnames(vols) == "volumei"] <- "potentialRnageVolume.I"
+colnames(vols)[colnames(vols) == "volumed"] <- "potentialNicheVolume.D"
+colnames(vols)[colnames(vols) == "volumei"] <- "potentialNicheVolume.I"
 
 # Save the data
 write.csv(vols, paste("NicheVolume_potential_actual_", genus_tag, ".csv", sep = ""))
@@ -64,14 +67,14 @@ vols <- read.csv(paste("NicheVolume_potential_actual_", genus_tag, ".csv", sep =
 
 myplot <- plotAnalysis(data = vols,
                        genus_name = genus_name,
-                       xv = "speciesAge", yv = "potentialNicheVolume.I", 
+                       xv = "speciesAge", yv = "potentialNicheVolume.D", 
                        nodeNumbercol = "node1", showStats = T,
                        xlabname = "Species age", ylabname = "Potential niche volume"
 ) +
   theme(text = element_text(size=10))
 
 # save
-ggsave(paste("Y:\\predNicheVolume_speciesAge_", genus_tag, ".png", sep = ""), plot = myplot,
+ggsave(paste("Y:\\potentialNicheVolume_speciesAge_", genus_tag, ".png", sep = ""), plot = myplot,
        width = 100, height = 80, units = "mm")
 
 rm(myplot)
@@ -81,7 +84,7 @@ rm(myplot)
 ############################################################################################################
 
 myplot <- plotAnalysis(data = vols,
-                       xv = "ecospat.corrected.I", yv = "potentialNicheVolume.I", 
+                       xv = "nicheVolume", yv = "potentialNicheVolume.D", 
                        nodeNumbercol = "node1", showStats = T,
                        genus_name = genus_name,
                        xlabname = "Actual niche volume", ylabname = "Potential niche volume"
@@ -100,7 +103,5 @@ rm(myplot)
 #########################################################################
 
 # Mean of niche filling rate
-(vols$ecospat.corrected.D / as.numeric(as.character(vols$potentialNicheVolume.D))) %>% mean
-
-(vols$ecospat.corrected.I / as.numeric(as.character(vols$potentialNicheVolume.I))) %>% mean
+(vols$nicheVolume / as.numeric(as.character(vols$potentialNicheVolume.D))) %>% mean
 

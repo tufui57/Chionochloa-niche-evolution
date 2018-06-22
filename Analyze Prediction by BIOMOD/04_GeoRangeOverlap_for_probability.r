@@ -20,6 +20,50 @@ get_BIOMOD_probability_by_nodeID <- function(i # node ID number
 }
 
 ####################################################################
+### Actual range overlap between sister species
+####################################################################
+# Import species occurrence data
+source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F02_clean_up_species_records.R")
+
+### Get rid of species whose occurren resords < 5
+dat2 <- dat[sapply(dat, nrow) >= 5]
+
+# Load ensamble projection data
+load(paste("Y://ensemblePrediction_", genus_tag, ".data", sep = ""))
+
+# Create imaginary speices occurring at all cells in NZ
+probAll <- pred[1]
+values(probAll[[1]]) <- ifelse(is.na(values(probAll[[1]])), NA, 1)
+
+sp.all <- data.frame(
+  cbind(coordinates(probAll[[1]]), values(probAll[[1]]))
+)
+colnames(sp.all)[1:2] <- c("lon", "lat")
+sp.all2 <- sp.all[!is.na(sp.all[,3]),]
+
+# Calculate Shoener's D
+D <- list()
+
+for(i in spname[spname %in% sapply(tree$tip.label, clean_speciesname)]){
+  
+  if(get_nodeID_from_spname(i,tree) %in% sispairs[,1]){
+    
+    # Get sister species name
+    spnode <- which(sispairs[,1] == get_nodeID_from_spname(i,tree))
+    sisname <- get_sisterSpNames(sispairs[spnode,1], tree)[[2]]
+    
+    D[[i]] <- SchoenerD_ecospat(sp.all2, "lon", "lat",
+                                dat2[[i]], dat2[[sisname]]
+                                )
+    
+  }else{
+    print(paste(i, "has no sister pair"))
+  }
+}
+    
+    
+
+####################################################################
 ### Potential range overlap between sister species
 ####################################################################
 
@@ -40,36 +84,36 @@ overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
 
 ### Node numbers of sister species pairs
 sisOverlapPd <- (overlapPdData$node1 %in% sispairs[,1]) %>% overlapPdData[., ]
-# Acaena
-if(genus_name == "Acaena"){
+
+if(genus_name=="Chionochloa"){
+  pro <- unlist(probD)[-length(unlist(probD))]
+}else{
   pro <- unlist(probD)
 }
-# Chionochloa
-if(genus_name == "Chionochloa"){
-  pro <- unlist(probD)[-length(unlist(probD))]
-}
-overlaps <- cbind(sisOverlapPd, pro)
-colnames(overlaps)[colnames(overlaps) == "pro"] <- "potentialNicheOverlap"
 
-write.csv(overlaps, paste("Nicheovrlap_potential_actual_", genus_tag, ".csv", sep = ""))
+
+overlaps <- cbind(sisOverlapPd, pro)
+colnames(overlaps)[colnames(overlaps) == "pro"] <- "potentialRangeOverlap"
+
+write.csv(overlaps, paste("Rangeovrlap_potential_actual_", genus_tag, ".csv", sep = ""))
 
 ############################################################################################################
 ##### Potential range overlap ~ actual niche overlap between sister species
 ############################################################################################################
 
-overlaps <- read.csv(paste("Nicheovrlap_potential_actual_", genus_tag, ".csv", sep = ""))
+overlaps <- read.csv(paste("Rangeovrlap_potential_actual_", genus_tag, ".csv", sep = ""))
 
 m <- lm(potentialNicheOverlap ~ nicheOverlap, overlaps)
 myplot <- plotAnalysis(data = overlaps,
                        genus_name = genus_name,
-                       xv = "nicheOverlap", yv = "potentialNicheOverlap", 
+                       xv = "Overlap", yv = "potentialRangeOverlap", 
                        nodeNumbercol = "node1", showStats = T,
-                       xlabname = "Actual niche overlap", ylabname = "Potential niche overlap"
+                       xlabname = "Actual range overlap", ylabname = "Potential range overlap"
 ) +
   theme(text = element_text(size=10))
 
 # save
-ggsave(paste("Y:\\Comparison_sister_nicheoverlap_", genus_tag, ".png", sep = ""), plot = myplot,
+ggsave(paste("Y:\\sister_RangeOverlap_", genus_tag, ".png", sep = ""), plot = myplot,
        width = 100, height = 80, units = "mm")
 
 rm(myplot)
@@ -80,15 +124,15 @@ rm(myplot)
 #########################################################################
 
 myplot <- plotAnalysis(data = overlaps,
-                       xv = "divergenceTime", yv = "potentialNicheOverlap", 
+                       xv = "divergenceTime", yv = "potentialRangeOverlap", 
                        nodeNumbercol = "node1", showStats = T,
                        genus_name = genus_name,
-                       xlabname = "Divergence Time", ylabname = "Potential niche overlap"
-)+
+                       xlabname = "Divergence Time", ylabname = "Potential range overlap"
+                       ) +
   theme(text = element_text(size=10))
 
 # save
-ggsave(paste("Y:\\sister_predNicheoverlap_divergenceTime_", genus_tag, ".png", sep = ""), plot = myplot,
+ggsave(paste("Y:\\sister_potentialRangeoverlap_divergenceTime_", genus_tag, ".png", sep = ""), plot = myplot,
        width = 100, height = 80, units = 'mm')
 
 rm(myplot)
