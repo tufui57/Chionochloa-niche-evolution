@@ -2,7 +2,8 @@
 ### Calculate geographical potential range overlap between sister sepcies
 ######################################################################################################
 
-genus_name <- "Chionochloa"
+genus_name <- "Chionochloa" 
+# genus_name <- "Acaena"
 
 library(dismo)
 
@@ -13,19 +14,45 @@ source(".//Chionochloa niche evolution//Analyze Prediction by BIOMOD//F_get_prob
 load(paste("Y://ensemblePrediction_", genus_tag, ".data", sep = ""))
 
 ####################################################################
+### Actual range volume
+####################################################################
+
+# Import species occurrence data
+source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F02_clean_up_species_records.R")
+
+### Get rid of species whose occurren resords < 5
+dat2 <- dat[sapply(dat, nrow) >= 5]
+
+# Create imaginary speices occurring at all cells in NZ
+probAll <- pred[1]
+values(probAll[[1]]) <- ifelse(is.na(values(probAll[[1]])), NA, 1)
+plot(probAll[[1]])
+
+# Get data frame of the imagenary species occcurrences
+sp.all <- data.frame(
+  cbind(coordinates(probAll[[1]]), values(probAll[[1]]))
+)
+colnames(sp.all)[1:2] <- c("lon", "lat")
+# Get rid of cells which aren't on land
+sp.all2 <- sp.all[!is.na(sp.all[,3]),]
+
+# Calculate ratio of species habitat area; area of occurrence cells / NZ land area
+D <- list()
+
+for(i in spname[spname %in% sapply(tree$tip.label, clean_speciesname)]){
+  D[[i]] <- nrow(dat2[[i]])/nrow(sp.all2)
+  }
+
+####################################################################
 ### Potential range volume
 ####################################################################
 
 # Import actual niche volume
-actualvol <- read.csv(paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
-
-# Create imaginary speices occurring at all cells in NZ
-probAll <- pred[1]
-values(probAll[[1]]) <- ifelse(is.na(values(probAll[[1]])), NA, 1000)
+actualvol <- data.frame(cbind(names(unlist(D)), unlist(D)))
+colnames(actualvol) <- c("spname", "rangeVolume")
 
 # Calculate niche volume
 vold <- list()
-voli <- list()
 
 for(i in spname){
   
@@ -36,8 +63,7 @@ for(i in spname){
   tryCatch(
   {
     vold[[i]] <- nicheOverlap(prob1[[1]], probAll[[1]], stat = 'D', mask = TRUE, checkNegatives = TRUE)
-    voli[[i]] <- nicheOverlap(prob1[[1]], probAll[[1]], stat = 'I', mask = TRUE, checkNegatives = TRUE)
-  }
+    }
   ,
   error = function(e) print(i)
   )
@@ -46,61 +72,32 @@ for(i in spname){
 
 ### Get vector of potential range values
 volumed <- as.numeric(as.character(vold))
-volumei <- as.numeric(as.character(voli))
 
-vols <- merge(actualvol, data.frame(cbind(spname, volumed, volumei)), by ="spname")
+vols <- merge(actualvol, data.frame(cbind(spname, volumed)), by ="spname")
 
 colnames(vols)[colnames(vols) == "volumed"] <- "potentialRangeVolume.D"
-colnames(vols)[colnames(vols) == "volumei"] <- "potentialRnageVolume.I"
+
+# Load species age
+spage <- read.csv(paste("NicheVolume_age_", genus_tag,".csv", sep=""))
+vols2 <- merge(vols, spage, by ="spname")
 
 # Save the data
-write.csv(vols, paste("NicheVolume_potential_actual_", genus_tag, ".csv", sep = ""))
+write.csv(vols2, paste("GeoVolume_potential_actual_", genus_tag, ".csv", sep = ""))
 
-#########################################################################
-### Potential range ~ species age
-#########################################################################
+##############################################################################################
+### Merge data of range and niche volume
+##############################################################################################
 
-vols <- read.csv(paste("NicheVolume_potential_actual_", genus_tag, ".csv", sep = ""))
+# Save the data
+vols <- read.csv(paste("GeoVolume_potential_actual_", genus_tag, ".csv", sep = ""))
 
-myplot <- plotAnalysis(data = vols,
-                       genus_name = genus_name,
-                       xv = "speciesAge", yv = "potentialNicheVolume.I", 
-                       nodeNumbercol = "node1", showStats = T,
-                       xlabname = "Species age", ylabname = "Potential niche volume"
-) +
-  theme(text = element_text(size=10))
+# Load niche volume data
+nichevol <- read.csv(paste("NicheVolume_potential_actual_", genus_tag, ".csv", sep = ""))
+vols2 <- merge(vols, nichevol[, c("spname", "potentialNicheVolume.D")], by ="spname")
 
-# save
-ggsave(paste("Y:\\predNicheVolume_speciesAge_", genus_tag, ".png", sep = ""), plot = myplot,
-       width = 100, height = 80, units = "mm")
-
-rm(myplot)
-
-############################################################################################################
-##### Compare potential range and actual niche volume
-############################################################################################################
-
-myplot <- plotAnalysis(data = vols,
-                       xv = "ecospat.corrected.I", yv = "potentialNicheVolume.I", 
-                       nodeNumbercol = "node1", showStats = T,
-                       genus_name = genus_name,
-                       xlabname = "Actual niche volume", ylabname = "Potential niche volume"
-)+
-  theme(text = element_text(size=10))
-
-
-# save
-ggsave(paste("Y:\\nicheVolume_potential_actual_", genus_tag, ".png", sep = ""), plot = myplot,
-       width = 100, height = 80, units = 'mm')
-
-rm(myplot)
-
-#########################################################################
-### Niche filling rate
-#########################################################################
-
-# Mean of niche filling rate
-(vols$ecospat.corrected.D / as.numeric(as.character(vols$potentialNicheVolume.D))) %>% mean
-
-(vols$ecospat.corrected.I / as.numeric(as.character(vols$potentialNicheVolume.I))) %>% mean
-
+# Save the data
+write.csv(vols2[, c("spname", "speciesAge", 
+                    "rangeVolume", "potentialRangeVolume.D", 
+                    "nicheVolume", "potentialNicheVolume.D")],
+          paste("Niche_Range_Volume_", genus_tag, ".csv", sep = "")
+)
