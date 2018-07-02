@@ -1,0 +1,70 @@
+########################################################
+### Calculate indices for analysis
+########################################################
+
+# Land cover change data
+gd <- read.csv(paste("Y://", genus_name, "_landscapeChangeHistory.csv", sep=""))
+
+# Add land cover type "others"
+gd$nonF.others <- (gd$nonF.EF + gd$nonF.nonPotentialHabitat)
+gd$NF.others <- (gd$NF.EF + gd$NF.nonPotentialHabitat)
+
+# Replace NA with 0
+gd[is.na(gd$NF.NF)] <- 0
+
+geoIncTable <- function(d, filepath){
+  ### Calculate habitats increase
+  
+  # # Absolute increase = occurrence cells in new habitat
+  # d$absoluteIncrease <- d$NF.nonF
+  # 
+  # Proportion of secondary open habitat = occ in secondary habitat / occ in primary and secondary habitat
+  d$proportionSecondaryHabitat <- (d$NF.nonF / (d$NF.nonF + d$nonF.nonF))
+  
+  # total = no. of all occurrence cells
+  d$total <- d$number.of.1km.occurrence.cells
+  d$log10.total <- log10(d$total)
+  # 
+  # # Initial range size of all sp = occurrences in old habitat
+  # d$initialRangeSize <- d$nonF.nonF
+  # d$log10.initialRange <- log10(d$initialRangeSize)
+  # 
+  # Preference for open habitat = sum of occ in open (NF.nonF + nonF.nonF) / (forest + open)
+  d$PreferenceOpen <- rowSums(d[, c("NF.nonF", "nonF.nonF")]) / rowSums(d[,c("NF.nonF", "NF.NF", "nonF.nonF", "nonF.NF")])
+  
+  write.csv(d[, c("X", # species names
+                   "total", "log10.total",
+                   "proportionSecondaryHabitat", 
+                   "PreferenceOpen"
+  )],
+  file = filepath)
+  
+  return(d)
+}
+
+geoIncTable(gd, paste("Y://Acaena project//", genus_name, "_data.csv", sep=""))
+
+########################################################
+### Add species age, niche volume/overlap
+########################################################
+
+gd <- read.csv(paste("Y://Acaena project//", genus_name, "_data.csv", sep = ""))
+
+# species age and niche volume
+if(file.exists(paste("Y:\\NicheVolume_age_", genus_name,".csv", sep=""))){
+  ages <- read.csv(paste("Y:\\NicheVolume_age_", genus_tag,".csv", sep=""))
+}else{
+  source(".//Chionochloa niche evolution//09_2_DataPreparation_for_Analysis.R")
+  ages <- read.csv(paste("Y:\\NicheVolume_age_", genus_tag,".csv", sep=""))
+}
+
+colnames(gd)[colnames(gd) == "X"] <- "spname"
+
+# Modify species name of species age dataframe
+a <- gsub("subsp", "subsp.", ages$X)
+# Chionochloa flaviscans in phylogeny tree and Chionochloa flaviscans f. flaviscans in occurrence records are treated as the same species?
+ages$X <- gsub("Chionochloa_flavicans", "Chionochloa_flavicans_f._flavicans", gsub("var", "var.", a))
+
+d2 <- merge(gd, ages, by="spname")
+
+write.csv(d2, paste("Y://Acaena project//", genus_name, "_data_analyses.csv", sep = ""))

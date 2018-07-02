@@ -2,39 +2,26 @@
 ### Clade niche overlap/volume
 ###################################################
 
-genus_name <- "Acaena"
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
-
+source(".//Chionochloa niche evolution//F01_calculate_node_age.R")
 
 #################################################################################
 ### Calculate node ages
 #################################################################################
-
-### Distance between all combinations of tips
-distances <- dist.nodes(tree)
-
-# Calculate species ages
-ages <- sapply(nodes[[1]], function(i){
-  # Phylogenetic distance list has 0 (distance to themselves)
-  (distances[,i] > 0) %>% distances[., i] %>% min
-}
-)
-
-ages <- as_tibble(ages) %>% mutate(., spname = row.names(nodes))
-
-# Calculate internal node ages
-nodeage <- cbind(rep(NA, length(branching.times(tree))), branching.times(tree))
-colnames(nodeage) <- c("spname", "value")
-
-# Combine tip and internal node ages
-agesTipAndNode <- rbind(ages, nodeage)
+agesTipAndNode <- calculateNodeAge(tree)
 
 ###################################################################
 ###  Dataframe of Clade niche volume & age
 ###################################################################
 
-volume <- read.csv(paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
+if(file.exists(paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))){
+  volume <- read.csv(paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
+}else{
+  source(".//Chionochloa niche evolution//08_Clade_nicheVolume.R")
+  volume <- read.csv(paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
+}
+
 extractAges <- agesTipAndNode[rownames(agesTipAndNode) %in% volume$nodeID,]
 
 ageVolData <- cbind(extractAges, volume[order(volume$nodeID), ])
@@ -45,7 +32,7 @@ write.csv(ageVolData[, c("nodeID", "spname", "nicheVolume", "speciesAge")],
           paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
 
 ################################################################################
-### Dataframe of Clade niche overlap & phylogenetic distances
+### Dataframe of Clade niche overlap & divergence time
 ################################################################################
 
 dis <- data.frame(distance2)
@@ -76,9 +63,8 @@ for(i in overlapPdData$node1){
 ###################################################
 
 # Divergence time; branch length of older branch within sister clade pair. 
-#                  What should be compared is lwngths of time since the two clades diverged from their ancestral species.
-# Phylogenetic distances; difference of branch length between sister clade pair. 
-#                         This difference means 
+#                  What should be compared is lengths of time since the two clades diverged from their ancestral species.
+
 
 overlap <- read.csv(paste(".//clade_schoennerD_", genus_tag, ".csv", sep = ""))
 

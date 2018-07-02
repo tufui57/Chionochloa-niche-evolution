@@ -66,4 +66,4 @@ d4.2 <- d4[seq(1,65,2)]
 d6 <- data.frame(cbind(d2.2,d3,d4.2,d5))
 colnames(d6) <- c("corrected.D","not corrected.D","corrected.I","not corrected.I")
 rownames(d6) <- sname2
-write.csv(d6, "Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Chionochloa_nicheVolume.csv")
+write.csv(d6, "Y:\\Chionochloa_nicheVolume.csv")
