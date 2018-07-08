@@ -3,7 +3,8 @@
 ####################################################################
 
 ### Add occurrence probability to the data frame of PCA scores
-get_occurrenceProbability_to_scores <- function(i # spname
+get_occurrenceProbability_to_scores <- function(i, # spname
+                                                pred # data frame of predicted probability
 ){
   
   # Get probability of the species
@@ -19,7 +20,8 @@ get_occurrenceProbability_to_scores <- function(i # spname
 }
 
 ### Rasterize PCA scores of probability
-raster_from_dataframe <- function(prob){
+raster_from_dataframe <- function(prob # PCA score with probability data
+                                  ){
   
   data <- prob[, c("PC1", "PC2", colnames(prob)[grep("^prob", colnames(prob))])]
   colnames(data)[1:2] <- c("x","y")

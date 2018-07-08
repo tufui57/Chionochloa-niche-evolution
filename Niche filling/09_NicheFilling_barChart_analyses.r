@@ -1,5 +1,6 @@
 
-genus_name <- "Acaena"
+genus_name <- "Chionochloa"
+"Acaena"
 
 library(dismo)
 
@@ -33,7 +34,7 @@ vols2$tag <- factor(vols2$tag, levels = vols2$tag[order(vols2$nichefilling)])
 # Bar plot
 myplot <- ggplot(vols2) +
   geom_bar(aes(x = tag, y = nichefilling), stat = "identity") +
-  ylab("Niche filling") +
+  ylab("Proportion of climatic Niche filled") +
   xlab(paste(genus_name, "species")) +
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -53,7 +54,7 @@ ggsave(paste("Y:\\nicheFilling_", genus_tag, ".png", sep = ""), plot = myplot)
 # Bar plot
 myplot <- ggplot(vols2) +
   geom_bar(aes(x = tag, y = rangefilling), stat = "identity") +
-  ylab("Range filling") +
+  ylab("Proportion of Range filled") +
   xlab(paste(genus_name, "species")) +
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))

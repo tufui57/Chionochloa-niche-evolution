@@ -2,19 +2,21 @@
 ### Regression figures
 ########################################################
 
+###################################################################################
+### Reproducible data set for analyses (on construction at 3.July.2018) 
+###################################################################################
+
 genus_name = "Acaena"
 genus_tag = "acaena"
 
 # Import data
 if(
-  file.exists(paste("Y://Acaena project//", genus_tag, "_data_analyses.csv", sep = ""))
+  file.exists(paste("Y://Acaena project//", genus_tag, "_data_analyses.csv", sep = "")) == FALSE
 ){
-  d <- read.csv(paste("Y://Acaena project//", genus_tag, "_data_analyses.csv", sep = ""))
-}else{
   source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//06_table_of_landcoverHistory_for_analyses.R")
   source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//06_2_calculate_indices_for_analyses.R")
-  d <- read.csv(paste("Y://Acaena project//", genus_tag, "_data_analyses.csv", sep = ""))
-}
+  }
+d <- read.csv(paste("Y://Acaena project//", genus_tag, "_data_analyses.csv", sep = ""))
 
 library(dplyr)
 source(".//Acaena niche evolution/F_Create_Package_speciseNameCleaning.r")
@@ -28,8 +30,15 @@ source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
 ### Add species trait, elevation and availability data
 ########################################################
 
+# Load niche overlap data
+if(file.exists("Y://shoenerD.csv") == FALSE){
+  source("Y:\\R scripts\\1 Acaena project\\Modified\\06_NicheOverlap.r")
+}
+# nihce overlap must be 0, not NA, for speices having no occurrence records in primary or secondary open habitat
+overlap <- read.csv("Y://shoenerD.csv")
+
 # Load trait data
-trait <- read.csv("Y://trait.csv")
+trait <- read.csv("Y://traits.csv")
 
 # Load availability
 if(file.exists("Y://availability_from_forest_primary_10_100km.csv") == FALSE){
@@ -38,13 +47,64 @@ if(file.exists("Y://availability_from_forest_primary_10_100km.csv") == FALSE){
 availability <- read.csv("Y://availability_from_forest_primary_10_100km.csv")
 
 # Claculate mean evelation of species occurrence records
-elev <- 
-
+# Elevation was extracted by ArcGIS. Thus, no scripts are left.
+elev <- read.csv("Y://Acaena project//Acaena_elevation.csv")
+elev <- elev[, c("mean_elevation", "niche_volume", "spname")]
+  
+# Niched breadths
+if(file.exists(paste("Y://Acaena project//", genus_tag, "_nicheBreadths.csv", sep = ""))== FALSE){
+  source("Y:\\R scripts\\1 Acaena project\\Modified\\08_2_Analyses_NicheBreadths.R")
+}
+breadths <- read.csv(paste("Y://Acaena project//", genus_tag, "_nicheBreadths.csv", sep = ""))
 
 # Merge data
-d <- merge(trait, availability, by = "spname") %>% 
-  merge(., elev, by = "spname") %>% 
-  merge(., d, by = "spname")
+dat <- merge(trait, availability, by = "X") %>% 
+  merge(., breadths[, c("spname", "median.of.temp", "median.of.prec")], by.x = "X", by.y = "spname") %>% 
+  merge(., elev, by.x = "X", by.y = "spname") %>% 
+  merge(., d[, -grep("x", colnames(d), ignore.case = T)], by.x = "X", by.y = "spname") %>% 
+  merge(., overlap, by = "X") 
+
+# Create types of dispersal ability (barb section - lifeform)
+dat$type <- paste(dat$barbSection, dat$lifeForm, sep = "_")
+dat$type2 <- sapply(dat$type, function(x){
+  ifelse(x == "Ancistrum_Stoloniferous" | x == "Microphyllae_Rhizomatous", x, "Others")
+})
+       
+########################################################
+### Multivariate analyses
+########################################################
+
+### Tests
+summary(lm(proportionSecondaryHabitat ~ median.of.temp + median.of.prec, data = dat))
+
+summary(glm(proportionSecondaryHabitat ~ log10.total + 
+              mean_elevation + X10km.. + PreferenceOpen + niche_volume + corrected.D + 
+              type2 + median.of.temp + median.of.prec,
+            data = dat)
+)
+
+
+
+#########################################################################
+### Proportion of Secondary Open Habitat - Preference for Open Habitat
+#########################################################################
+
+myplot <- plotAnalysis(data = d,
+                       genus_name = genus_name,
+                       xv = "PreferenceOpen", yv = "proportionSecondaryHabitat", showStats = T,
+                       xlabname = expression("closed" %<-% "Preference for open habitat" %->% "open"),
+                       ylabname = "Proportion of secondary open habitat",
+                       nodeNumbercol = "tag", label.point = T)
+
+myplot2 <- myplot + 
+  xlim(0, 1) +
+  geom_vline(xintercept = 0.5, linetype = "dashed")
+
+# save
+ggsave(paste("Y:\\preferenceOpen_proportionSecondary_nolegend.png", sep = ""), plot = myplot2,
+       width = 300, height = 210, units = 'mm')
+
+rm(myplot)
 
 ##################################################
 ### Proportion of secondary open habitat ~ dispersal type
@@ -168,3 +228,55 @@ ggsave(paste("Y:\\ProportionSecondary_100kmAvailability.png", sep = ""), plot = 
 rm(myplot, m)
 
 
+
+
+#########################################################################
+### Proportion of Secondary Open Habitat - Niche volume
+#########################################################################
+
+m <- lm(proportionSecondaryHabitat ~ niche_volume, d)
+
+myplot <- plotAnalysis(data=d, m=m, xv = "niche_volume", yv = "proportionSecondaryHabitat", showStats = F,
+                       xlabname = "Species niche volume", ylabname = "Proportion of secondary open habitat")
+
+myplot2 <- myplot + 
+  xlim(0, 1)
+
+# save
+ggsave(paste("Y:\\nicheVolume_proportionSecondary_nolegend.png", sep = ""), plot = myplot2,
+       width = 300, height = 210, units = 'mm')
+
+rm(myplot, m)
+
+#########################################################################
+### Proportion of Secondary Open Habitat - temperature niche
+#########################################################################
+
+m <- lm(proportionSecondaryHabitat ~ unlist.med1., d)
+
+myplot <- plotAnalysis(data=d, m=m, xv = "unlist.med1.", yv = "proportionSecondaryHabitat", showStats = F,
+                       xlabname = "Median of temperature niche", ylabname = "Proportion of secondary open habitat")
+
+
+# save
+ggsave(paste("Y:\\tempNiche_proportionSecondary_nolegend.png", sep = ""), plot = myplot,
+       width = 300, height = 210, units = 'mm')
+
+rm(myplot, m)
+
+
+#########################################################################
+### Proportion of Secondary Open Habitat - precipitation niche
+#########################################################################
+
+m <- lm(proportionSecondaryHabitat ~ unlist.med2., d)
+
+myplot <- plotAnalysis(data=d, m=m, xv = "unlist.med2.", yv = "proportionSecondaryHabitat", showStats = F,
+                       xlabname = "Median of precipitation niche", ylabname = "Proportion of secondary open habitat")
+
+
+# save
+ggsave(paste("Y:\\precNiche_proportionSecondary_nolegend.png", sep = ""), plot = myplot,
+       width = 300, height = 210, units = 'mm')
+
+rm(myplot, m)
