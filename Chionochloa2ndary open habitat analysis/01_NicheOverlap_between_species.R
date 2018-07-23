@@ -3,7 +3,7 @@
 #########################################################
 
 # Data import
-alld <- read.csv("Y:\\Acaena project\\chionochloa_bioclim_landcover_1km.csv")
+alld <- read.csv("Y:\\1st chpater_Acaena project\\meta data\\chionochloa_bioclim_landcover_1km.csv")
 d <- alld[is.na(alld$bioclim1) == F, ]
 
 # sp names

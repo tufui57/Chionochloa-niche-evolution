@@ -12,6 +12,16 @@ if(genus_name == "Acaena"){
 reso = 5
 worldclim = 1
 
+library(dplyr)
+
+# LGM climate
+load(paste(".\\LGM_mainisland_worldclim",
+           worldclim, "_", reso, "km_scores.data", sep = "")
+)
+# Current climate
+load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
+           worldclim, "_", reso, "km.data", sep = ""))
+
 
 # cell size should be different depending on the resolution of climate rasters
 
@@ -19,32 +29,23 @@ if(reso==1){
   cellsize <- c(0.001, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1)
 }
 if(reso==5){
-  cellsize <- seq(0.01, 0.1, by=0.005)
+  cellsize <- c(0.001, 0.005, seq(0.01, 0.1, by = 0.005))
 }
+
 
 res <- list()
 for(a in cellsize){
   
   cat(paste("cell size =", a))
   
-  if(file.exists(paste(".//temporary//persistentRatio_age_",genus_tag, reso, "km", a, ".csv", sep="")) == FALSE
+  if(file.exists(paste(".//persistentRatio_age_",genus_tag, reso, "km", a, ".csv", sep="")) == FALSE
   ){
     source(".//Chionochloa niche evolution//LGM climate niche//02_PCAdataPreparation.R")
     source(".//Chionochloa niche evolution//LGM climate niche//04_PastClimate_analysis.R")
   }else{
     
-    library(dplyr)
-    
-    # LGM climate
-    load(paste(".\\LGM_mainisland_worldclim",
-               worldclim, "_", reso, "km_scores.data", sep = "")
-    )
-    # Current climate
-    load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
-               worldclim, "_", reso, "km.data", sep = ""))
-    
     # Persistent climate
-    load(paste(".//temporary//currentNicheSimilarToLGM_", a,"_", genus_tag, "_", reso, "km.data", sep = ""))
+    load(paste(".//currentNicheSimilarToLGM_", a,"_", genus_tag, "_", reso, "km.data", sep = ""))
     
     # Add cell ID to current PCA scores
     scores$cellID <- 1:nrow(scores)
@@ -92,5 +93,5 @@ for(a in cellsize){
 
 regression <- cbind(cellsize, unlist(res))
 png("cellSizeComparison.png")
-plot(regression, xlab="LGM neighbourhood cell size", ylab="Ratio of persistent climate")
+plot(regression, xlab="Neighbourhood radius", ylab="Ratio of current areas with persistent climate")
 dev.off()

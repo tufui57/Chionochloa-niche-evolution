@@ -1,0 +1,123 @@
+---
+title: "Consequences of LGM neighbourhood cell size"
+author: "Miki Nomura"
+date: "8 June 2018"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+
+############################################################################################
+### Run this script in the folder where required files are!
+############################################################################################
+
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+```
+
+
+```{r Set genus and neighbourhood cell size}
+genus_name = "Chionochloa"
+
+# Create genus tag
+if(genus_name == "Chionochloa"){
+  genus_tag <- "chion"
+}
+
+if(genus_name == "Acaena"){
+  genus_tag <- "acaena"
+}
+reso = 5
+Worldclim = 1
+
+# cell size; if the resolution of climate rasters is 1km, cell size should be c(0.001, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1)
+# if the resolution is 5km, cell size should be c(0.01, 0.015, 0.02, 0.025, 0.05)
+a = 0.045
+cat(paste("cell size =", a))
+
+  if(file.exists(paste(".//persistentRatio_age_acaena", reso, "km", a, ".csv", sep="")) == FALSE
+  ){
+    source(".//Chionochloa niche evolution//LGM climate niche//02_PCAdataPreparation.R")
+    source(".//Chionochloa niche evolution//LGM climate niche//04_PastClimate_analysis.R")
+  }
+  
+```
+
+```{r range of bioclim values within the cells}
+source(".//Chionochloa niche evolution//LGM climate niche//06_ReversePCvalues_to_originalClimateVlues.R")
+
+```
+
+Ratio of persistent habitat with persistent climate
+```{r}
+
+# Number of 1 km cells in land areas of currnet NZ 
+n.nz <- nrow(scores)
+# Number of 1 km cells in land areas of Zealandia in LGM
+n.lgm <- nrow(newdf)
+# Number of 1 km cells in primary open habitat
+n.primary <- nrow(primary)
+# Number of 1 km cells in primary open habitat
+n.secondary <- nrow(scoresLGM[scoresLGM[, "landCoverChange"] == "NF-nonF", ])
+
+# Number of 1 km cells in areas with persistent climate in current NZ
+n.persistent <- nrow(persistentClimate)
+# Number of 1 km cells in persistent habitat (primary open) with persitent climate
+n.persistentHabitatPersistentClimate <- nrow(persistentHabitatPersistentClimate)
+
+### Calculate Ratio
+
+print("Ratio of current areas with persistent climate")
+print(n.persistent/n.nz)
+
+print("Ratio of current areas whise climate became available after LGM")
+print((n.nz - n.persistent)/n.nz)
+
+print("Ratio of LGM areas whose climate isn't currrently available")
+print((n.lgm - n.persistent)/n.lgm)
+
+print("Ratio of persistent habitat with persistent climate among primary open habitat")
+print(n.persistentHabitatPersistentClimate / n.primary)
+
+print("Ratio of secondary oepn habitat with persistent climate among secondary open habitat")
+persistent2ndaryOpen <- persistentClimate[persistentClimate[,"landCoverChange"] == "NF-nonF", ] 
+print(nrow(persistent2ndaryOpen)/ n.secondary)
+
+print("Ratio of persistent climate among open habitats")
+print((n.persistentHabitatPersistentClimate + nrow(persistent2ndaryOpen)) / (n.primary + n.secondary))
+
+```
+
+
+Species age - Persistent occurrence ratio
+```{r}
+library(ggplot2)
+source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
+persistentRatioAge <- read.csv(paste("persistentRatio_age_", genus_tag, reso, "km",a, ".csv", sep = ""))
+
+
+summary(
+  lm(persistentRatio ~ speciesAge, data = persistentRatioAge)
+)
+
+myplot <- plotAnalysis(data = persistentRatioAge, 
+                       xv = "speciesAge", yv = "persistentRatio", 
+                       nodeNumbercol = "nodeID", showStats = T,
+                       xlabname = "Taxon age", 
+                       ylabname = "Ratio of open habitat with persistent climate",
+                       label.point = TRUE,
+                       genus_name = genus_name
+) +
+  
+  theme(text = element_text(size=10)) +
+  scale_y_continuous(breaks = seq(0.45, 1.1, by = 0.1), limits = c(0.45, 1.1))
+
+ggsave(paste("Y://", genus_tag, a, reso, "km.png"), myplot, width = 100, height = 80, units = "mm")
+
+
+```
+
+
+
+

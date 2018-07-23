@@ -13,7 +13,7 @@ library(dplyr)
 
 # Chionochloa
 sp <- read.csv(
-  paste("Y:\\Acaena project\\", genus_name, "_bio_alt.csv", sep = "")
+  paste("Y:\\2nd chapter_phylogentic niche conservation\\raw data\\", genus_name, "_bio_alt.csv", sep = "")
 )
 
 ##########################################################################################
@@ -49,7 +49,7 @@ sp3 <- sp2 %>%
 levels(as.factor(sp3$taxa))
 
 chnames <- read.csv(
-  paste("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\NZPCN_Flora_",
+  paste("Y:\\1st chpater_Acaena project\\meta data\\NZPCN_Flora_",
                     genus_name, ".csv", sep = "")
   )
 

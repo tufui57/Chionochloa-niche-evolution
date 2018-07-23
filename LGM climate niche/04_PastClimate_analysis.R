@@ -2,6 +2,14 @@
 ### Habitat and Climate Persistence 
 #################################################################################
 
+genus_name = "Chionochloa"
+
+# Radius size "a" mustn't set in this script!
+# This script will be used in other scripts!
+
+# Resolution of geographical grid cells
+# reso = 5
+
 ########################################
 ### Data preparation
 ########################################
@@ -18,7 +26,7 @@ library(rgeos)
 
 source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
 
-Worldclim <- 1
+
 # Choose past data
 time <- #"lig_30s_bio"
   "mrlgmbi_2-5m" # LGM data is 2.5 arc min (4.5km at the equator)
@@ -29,7 +37,7 @@ time <- #"lig_30s_bio"
 vars <- c(1,6,12,15)
 
 # Load past PCA scores with the LGM neighbourhood data
-load( paste(".//currentNicheSimilarToLGM_", a,"_", reso, "km.data", sep = ""))
+load(paste(".//currentNicheSimilarToLGM_", a,"_", genus_tag, "_", reso, "km.data", sep = ""))
 
 # Create genus tag
 if(genus_name == "Chionochloa"){
@@ -50,6 +58,7 @@ load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
 load(paste(".\\LGM_mainisland_worldclim",
            Worldclim, "_", reso, "km_scores.data", sep = "")
 )
+
 #################################################################################
 ### Habitat and Climate Persistence 
 #################################################################################
@@ -58,7 +67,8 @@ load(paste(".\\LGM_mainisland_worldclim",
 scores$cellID <- 1:nrow(scores)
 
 # Add availability of climate niche in LGM to current PCA scores
-# neighbours$dat2cellID has cell ID of the "scores" object, thus, rows of "scores" whose cell ID are in "neighbours$dat2cellID"
+# neighbours$dat2cellID has cell ID of the "scores" object.
+# Thus, rows of "scores" whose cell ID are found in "neighbours$dat2cellID" are considered to be similar to LGM climate
 
 scoresLGM <- mutate(scores, lgm = ifelse(scores$cellID %in% neighbours$dat2cellID, 1, 0))
 
@@ -104,4 +114,14 @@ persistentRatioAge <- mutate(persistentRatioAge, persistentRatio = as.numeric(as
 write.csv(persistentRatioAge, file = paste("persistentRatio_age_", genus_tag, reso, "km", a, ".csv", sep = ""))
 
 
+#################################################################################
+### Proportion of current climate with persistent climate
+#################################################################################
 
+# Number of 1 km cells in land areas of currnet NZ 
+n.nz <- nrow(scores)
+# Number of 1 km cells in areas with persistent climate in current NZ
+n.persistent <- nrow(persistentClimate)
+
+print("Ratio of current areas with persistent climate")
+print(n.persistent/n.nz)

@@ -7,7 +7,7 @@ genus_name <- "Chionochloa"
 library(dismo)
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
-source(".//Chionochloa niche evolution//Analyze Prediction by BIOMOD//F_get_probability.r")
+source(".//Chionochloa niche evolution//Niche filling//F_get_probability.r")
 
 # Load ensamble projection data
 load(paste("Y://ensemblePrediction_", genus_tag, ".data", sep = ""))
@@ -20,7 +20,7 @@ load(paste("Y://ensemblePrediction_", genus_tag, ".data", sep = ""))
 actualvol <- read.csv(paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
 
 # Create imaginary speices occurring at all cells in NZ
-prob1 <- get_occurrenceProbability_to_scores(spname[1])
+prob1 <- get_occurrenceProbability_to_scores(spname[1], pred)
 ras1 <- raster_from_dataframe(prob1)
 rasall <- ras1
 values(rasall) <- ifelse(is.na(values(ras1)), NA, 1000)

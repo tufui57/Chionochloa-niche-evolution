@@ -23,7 +23,7 @@ source(".//Acaena niche evolution//F_plotClimateSpaceWithPhylogenyTree.R")
 
 if(genus_name == "Chionochloa"){
   # Import phylogenetic tree data
-  org.tree <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\Chionochloa_genetic_data\\Chiono_summary.trees")
+  org.tree <- read.nexus("Y:\\2nd chapter_phylogentic niche conservation\\raw data\\Phylogenetic data and trees\\Chionochloa_genetic_data\\Chiono_summary.trees")
   tree <- extract.clade(org.tree, 41)
   
   genus_tag <- "chion"
@@ -42,7 +42,7 @@ if(genus_name == "Chionochloa"){
 
 if(genus_name == "Acaena"){
   # Import phylogeny tree data
-  org.tree <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\From Angela\\NZ_Acaena_BEAST_output_6gene.tree")
+  org.tree <- read.nexus("Y:\\2nd chapter_phylogentic niche conservation\\raw data\\Phylogenetic data and trees\\From Angela\\NZ_Acaena_BEAST_output_6gene.tree")
   tree <- extract.clade(org.tree, 28)
   
   genus_tag <- "acaena"

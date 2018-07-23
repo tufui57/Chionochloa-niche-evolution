@@ -8,7 +8,7 @@ genus_name <- "Chionochloa"
 library(dismo)
 
 source(".//Chionochloa niche evolution//00_DataPreparation.R")
-source(".//Chionochloa niche evolution//Analyze Prediction by BIOMOD//F_get_probability.r")
+source(".//Chionochloa niche evolution//Niche filling//F_get_probability.r")
 
 # Load ensamble projection data
 load(paste("Y://ensemblePrediction_", genus_tag, ".data", sep = ""))

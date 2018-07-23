@@ -1,6 +1,8 @@
 # Choose past data. Interglacial; "lig_30s_bio", 6k year ago; "ccmidbi_30s"
 time <- "mrlgmbi_2-5m" # LGM data is 2.5 arc min (4.5km at the equator)
 
+Worldclim = 1
+
 # Resolution of rasters
 reso = 5
 
