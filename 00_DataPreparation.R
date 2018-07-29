@@ -11,11 +11,11 @@ library(grid)
 library(gridExtra)
 library(ggtree)
 
-source(".//Acaena niche evolution//F_generateClimateDataOfClades.R")
-source(".//Acaena niche evolution//F_SchonnerDdataframeFormat.r")
-source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
-source(".//Acaena niche evolution/F_Create_Package_speciseNameCleaning.r")
-source(".//Acaena niche evolution//F_plotClimateSpaceWithPhylogenyTree.R")
+source(".//functions//F_generateClimateDataOfClades.R")
+source(".//functions//F_SchonnerDdataframeFormat.r")
+source(".//functions//F_plotAnalysis_clade_niche.R")
+source(".//functions/F_speciseNameCleaning_spnameFromPhylogenyTree.r")
+source(".//functions//F_plotClimateSpaceWithPhylogenyTree.R")
 
 ##############################################################################
 ### Data preparation

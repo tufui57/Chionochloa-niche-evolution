@@ -1,6 +1,6 @@
 
-#genus_name <- "Acaena"
-genus_name <- "Chionochloa"
+genus_name <- "Acaena"
+# genus_name <- "Chionochloa"
 
 # neighbourhood cell size
 a=0.045
@@ -16,27 +16,29 @@ source(".//Chionochloa niche evolution//00_DataPreparation.R")
 ########################################################################################################
 
 library(ggplot2)
-source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
-persistentRatioAge <- read.csv(paste("persistentRatio_age_", genus_tag, reso, "km", a, ".csv", sep = ""))
+source(".//functions//F_plotAnalysis_clade_niche.R")
+# persistentRatioAge <- read.csv(paste("persistentRatio_age_", genus_tag, reso, "km", a, ".csv", sep = ""))
 
+Age <- read.csv(paste("persistentRatio_age_", genus_tag, reso, "km", a, ".csv", sep = ""))
+persistentOpen <- read.csv(paste(".//PersistentOccurrences_", genus_tag, ".csv", sep=""))
+
+persistentRatioAge <- merge(Age, persistentOpen, by.x = "spname", by.y = "X")
 
 summary(
-  lm(persistentRatio ~ speciesAge, data = persistentRatioAge)
+  lm(D ~ speciesAge, data = persistentRatioAge)
 )
 
 myplot <- plotAnalysis(data = persistentRatioAge, 
-                       xv = "speciesAge", yv = "persistentRatio", 
+                       xv = "speciesAge", yv = "D", 
                        nodeNumbercol = "nodeID", showStats = T,
                        xlabname = "Species age", 
-                       ylabname = "Ratio of open habitat with persistent climate",
+                       ylabname = "Niche overlap between species occurrences in open habitat and LGM climate",
                        label.point = TRUE,
                        genus_name = genus_name
 ) +
-  
-  theme(text = element_text(size=10)) +
-  scale_y_continuous(breaks = seq(0.45, 1.1, by = 0.1), limits = c(0.45, 1.1))
+  theme(text = element_text(size=10))
 
-ggsave(paste("Y://", genus_tag, a, reso, "km.png"), myplot, width = 100, height = 80, units = "mm")
+ggsave(paste("Y://spAge_persistentRatio", genus_tag, ".png"), myplot, width = 100, height = 80, units = "mm")
 
 ########################################################################################################
 ### Data import
@@ -46,8 +48,6 @@ ggsave(paste("Y://", genus_tag, a, reso, "km.png"), myplot, width = 100, height 
 ageVolData <- read.csv(paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
 # Time since divergence - niche overlap
 overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
-# Proportion of secondary open habitat
-secondaryOpen <- read.csv(paste("Y://Acaena project//", genus_name, "_data_analyses.csv", sep = ""))
 
 ########################################################################################################
 ### Niche overlap ~ Divergence time 
@@ -62,7 +62,7 @@ myplot <- plotAnalysis(data = sisOverlapPd, genus_name = genus_name,
                        yv = "nicheOverlap", xv = "divergenceTime", 
                        nodeNumbercol = "node1", showStats = T,
                        ylabname = "Niche overlap between sister species", 
-                       xlabname = "Time since divergence",
+                       xlabname = "Divergence time",
                        label.point = TRUE
 ) + 
   theme(text = element_text(size=10)) +
@@ -89,7 +89,5 @@ myplot <- plotAnalysis(data = ageVolData, genus_name = genus_name,
   scale_y_continuous(limits = c(0, 1))
 
 ggsave(paste("Y://", genus_tag, "_nicheVolume_age.png", sep=""), myplot, width = 100, height = 80, units = "mm")
-
-
 
 rm(myplot)

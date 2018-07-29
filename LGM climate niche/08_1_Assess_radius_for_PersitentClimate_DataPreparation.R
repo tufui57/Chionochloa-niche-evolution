@@ -15,7 +15,7 @@ library(maptools)
 library(raster)
 library(rgdal)
 library(rgeos)
-source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
+source(".//functions/F_plotAnalysis_clade_niche.R")
 
 genus_name = "Chionochloa"
 

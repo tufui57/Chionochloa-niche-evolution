@@ -18,6 +18,9 @@ library(dplyr)
 
 genus_name <- "Chionochloa"
 
+worldclim=1
+reso=5
+
 # Create genus tag
 if(genus_name == "Chionochloa"){
   genus_tag <- "chion"
@@ -72,7 +75,7 @@ extent_y = c(min(scores$PC2), max(scores$PC2))
 ###############################################################
 
 # Data import
-d <- read.csv(paste("Y://", genus_name, "_bioclim_landcover_history_worldclim",
+d <- read.csv(paste("Y://2nd chapter_phylogentic niche conservation//meta data//", genus_name, "_bioclim_landcover_history_worldclim",
                     worldclim, "_", reso, "km.csv", sep=""
 ))
 
@@ -98,17 +101,17 @@ niche <- ggplot() +
   # NZ
   geom_point(data = scores, aes(PC1, PC2), color = 'gray90') +
   # Primary open area
-  geom_point(data = primary, aes(PC1, PC2), color = "brown") +
+  geom_point(data = primary, aes(PC1, PC2), color = "blue") +
   # Persistent open habitat
   geom_point(data = persistentOpenHabitat, aes(PC1, PC2), color = "red") +
   # extent
   xlim(extent_x) +
   ylim(extent_y) +
-  # legend position inside plot
+  # No background
   theme(axis.title = element_text(size = 15),
         legend.position = "none",
-        panel.background = element_rect(fill = 'gray96')
-  )
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
 
 
@@ -146,7 +149,7 @@ map <- ggplot() +
     breaks = c("Persistent", "Primary"),
     label = c("Persistent open area with \n persitent climate","Primary open area"),
     # colours
-    values = c("red", "brown")
+    values = c("red", "blue")
   ) +
   guides(colour = guide_legend(override.aes = list(size = 5, shape=16, alpha=0.7))) +
   labs(x="", y="") +
@@ -162,18 +165,10 @@ map <- ggplot() +
         axis.ticks.y = element_blank()
   )
 
-png(paste("Y://Persistent_niche_map_worldclim", worldclim, "_", reso, "km.png", sep=""),
+png(paste("Y://Persistent_niche_map_worldclim", worldclim, "_", a, "radius_", reso, "km.png", sep=""),
     width = 1200, height = 650)
 grid.arrange(map, niche, ncol = 2, widths = c(3,5))
 dev.off()
-
-# Rasterize habitat with persistent climate and primary open habitat.
-# ggplot points can't be as small as you want.
-
-ras.persistent.open <- rasterFromXYZ(primary[,c("x", "y","lgm")]) 
-plot(ras.persistent.open, col=c("red", "brown"))
-
-# But the raster plot still looks similar to point ggplot.
 
 
 

@@ -15,20 +15,13 @@ gd[is.na(gd$NF.NF)] <- 0
 geoIncTable <- function(d, filepath){
   ### Calculate habitats increase
   
-  # # Absolute increase = occurrence cells in new habitat
-  # d$absoluteIncrease <- d$NF.nonF
-  # 
   # Proportion of secondary open habitat = occ in secondary habitat / occ in primary and secondary habitat
   d$proportionSecondaryHabitat <- (d$NF.nonF / (d$NF.nonF + d$nonF.nonF))
   
   # total = no. of all occurrence cells
   d$total <- d$number.of.1km.occurrence.cells
   d$log10.total <- log10(d$total)
-  # 
-  # # Initial range size of all sp = occurrences in old habitat
-  # d$initialRangeSize <- d$nonF.nonF
-  # d$log10.initialRange <- log10(d$initialRangeSize)
-  # 
+  
   # Preference for open habitat = sum of occ in open (NF.nonF + nonF.nonF) / (forest + open)
   d$PreferenceOpen <- rowSums(d[, c("NF.nonF", "nonF.nonF")]) / rowSums(d[,c("NF.nonF", "NF.NF", "nonF.nonF", "nonF.NF")])
   

@@ -2,8 +2,11 @@
 ## Calculate Schoenner's D between all species pairs
 #########################################################
 
+library(ecospat)
+library(nichePlot)
+
 # Data import
-alld <- read.csv("Y:\\1st chpater_Acaena project\\meta data\\chionochloa_bioclim_landcover_1km.csv")
+alld <- read.csv("Y:\\2nd chapter_phylogentic niche conservation\\meta data\\chionochloa_bioclim_landcover_1km.csv")
 d <- alld[is.na(alld$bioclim1) == F, ]
 
 # sp names
@@ -32,68 +35,56 @@ scores <- data.frame(d[, c(paste("bioclim", c(1, 6, 12, 15), sep = ""), "x", "y"
 save(scores, file = ".//Scores_chion.data")
 
 
-### Claculate Schoenner's D
+### Claculate Schoenner's D for all combinations of species
 
+# Combination of species
 
-library(ecospat)
-
-SchoenerD <- function(scores, gen1, gen2) {
-
-  # Extract data of two target species
-  scores.gen1 <-  scores[scores[, gen1] == 1,c("PC1", "PC2")]
-  scores.gen2 <-  scores[scores[, gen2] == 1,c("PC1", "PC2")]
-  scores.clim <- scores[, c("PC1", "PC2")]
-
-  # calculation of occurence density and test of niche equivalency and similarity
-  z1 <- ecospat.grid.clim.dyn(scores.clim, scores.clim, scores.gen1, R = 100)
-  z2 <- ecospat.grid.clim.dyn(scores.clim, scores.clim, scores.gen2, R = 100)
-
-  res <- list()
-  ## Schoener D
-  res[[1]] <- unlist(ecospat.niche.overlap(z1, z2, cor = T))
-  res[[2]] <- unlist(ecospat.niche.overlap(z1, z2, cor = F))
-  # Name
-  name_genera <- paste(strsplit(gen1, ".csv"),strsplit(gen2, ".csv"), sep="_")
-  names(res) <- c(paste(name_genera, "corrected"), paste(name_genera, "not corrected"))
-
-  return(res)
-}
-
-com <- combn(sname2,2)
+sname2 <- sname[sname %in% colnames(scores)]
+  
+com <- combn(sname2, 2)
 
 result <- list()
 
 for(i in 1:ncol(com)){
 
-  gen1=com[,i][1]
-  gen2=com[,i][2]
+  # Species names
+  gen1 = com[,i][1]
+  gen2 = com[,i][2]
+  
+  # Species data
+  scores1 <- scores[scores[, gen1] == 1,]
+  scores2 <- scores[scores[, gen2] == 1,]
 
-  result[[i]] <- SchoenerD(scores, gen1, gen2)
+  # Schoner's D
+  result[[i]] <- SchoenerD_ecospat(scores, "PC1", "PC2", scores1, scores2)
 
 }
 
+# Collate data frame
 dat <-list()
 for(i in 1:length(result)){
   x <- data.frame(result[[i]])
   colnames(x) <- c("ecospat.corrected", "ecospat.uncorrected")
   dat[[i]] <- x[1,]
 }
-names(dat)<-sapply(result, function(x){
-  a <- gsub("_pa", "", colnames(x)[1])
-  gsub(".corrected","", a)
-  }
-  )
 
+# Name data
+for(i in 1:ncol(com)){
+  
+  # Species names
+  gen1 = com[,i][1]
+  gen2 = com[,i][2]
+  
+  names(dat)[i] <- paste(gen1, gen2)
+}
 
-write.csv(do.call(rbind, dat), "Y://schoennerD_Chionochloa.csv")
-
-chion <- read.csv("Y://schoennerD_Chionochloa.csv")
+chion <- do.call(rbind, dat)
 c1 <- data.frame(as.character(t(com[1,])))
 c2 <- data.frame(as.character(t(com[2,])))
-chion2 <- cbind(c1, c2, chion[,-1])
+chion2 <- cbind(c1, c2, chion)
 
 colnames(chion2)[1:2] <- c("spname1", "spname2")
 
-write.csv(chion2,"Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\schoennerD_Chionochloa.csv")
+write.csv(chion2,"Y:\\schoennerD_Chionochloa.csv")
 
 

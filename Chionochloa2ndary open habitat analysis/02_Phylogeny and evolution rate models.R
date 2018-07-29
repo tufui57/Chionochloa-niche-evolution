@@ -9,7 +9,7 @@ library(phytools)
 # Output of TreeAnnotator
 # TreeAnnotator output is the one chosen among tree candidates estimated on the process of MCMC sampling.
 # Species names must not have space. Replace space with _ (underscore).
-acaena <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\From Angela\\NZ_Acaena_BEAST_output_6gene.tree")
+acaena <- read.nexus("Y:\\2nd chapter_phylogentic niche conservation\\raw data\\Phylogenetic data and trees\\Phylogenetic data and trees\\From Angela\\NZ_Acaena_BEAST_output_6gene.tree")
 
 ltt(acaena)
 
@@ -31,9 +31,9 @@ library(ouch)
 # Output of TreeAnnotator
 # TreeAnnotator output is the one chosen among tree candidates estimated on the process of MCMC sampling.
 # Species names must not have space. Replace space with _ (underscore).
-acaena <- read.nexus("Y:\\Niche change of lineages\\Niche evolution of open habitat species in islands\\Phylogenetic data and trees\\From Angela\\NZ_Acaena_BEAST_output_6gene.tree")
+acaena <- read.nexus("Y:\\2nd chapter_phylogentic niche conservation\\raw data\\Phylogenetic data and trees\\Phylogenetic data and trees\\From Angela\\NZ_Acaena_BEAST_output_6gene.tree")
 
-alld <- read.csv("Y:\\Acaena project\\acaena_bioclim_landcover_1km.csv")
+alld <- read.csv("Y:\\1st chpater_Acaena project\\meta data\\Acaena_bioclim_landcover_1km.csv")
 aca.d <- alld[is.na(alld$bioclim1) == F, ]
 
 # sp names
@@ -58,7 +58,7 @@ format_trait_data <- function(
   
   # Get mean of PC1
   trait <- sapply(sname2, function(i){
-    occ <- scores[scores[,i]==1,]
+    occ <- scores[scores[,i] == 1,]
     mean(occ$PC1)
   }
   )

@@ -5,11 +5,11 @@
 library(ecospat)
 library(nichePlot)
 library(dplyr)
-source(".//Acaena niche evolution//F_SchonnerDdataframeFormat.r")
-source(".//Acaena niche evolution//F_Create_Package_speciseNameCleaning.r")
+source(".//functions//F_SchonnerDdataframeFormat.r")
+source(".//functions//F_speciseNameCleaning_spnameFromPhylogenyTree.r")
 
-genus_name <- "Chionochloa" # "Acaena"
-
+genus_name <- "Acaena"
+"Chionochloa" # 
 ###################################
 ### Data preparation
 ###################################
@@ -24,13 +24,12 @@ if(genus_name == "Acaena"){
 load(paste(".//Scores_", genus_tag, ".data", sep=""))
 
 # LGM climate
-load(paste(".\\LGM_mainisland_worldclim",
-           Worldclim, "_", reso, "km_scores.data", sep = "")
+load(paste(".\\LGM_mainisland_worldclim1_5km_scores.data", sep = "")
 )
 
 
 ### Schoenner's D between current climate of species occurrences within primary open habitat and LGM climate
-spname <- colnames(scores)[grep("^Chion", colnames(scores))]
+spname <- colnames(scores)[grep(paste("^", genus_name, sep = ""), colnames(scores))]
 primaryOpen <- scores[scores$landCoverChange == "NF-nonF",]
 
 background <- rbind(scores[, c("PC1", "PC2")], newdf[, c("PC1", "PC2")])

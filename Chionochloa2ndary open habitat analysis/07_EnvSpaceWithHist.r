@@ -4,10 +4,11 @@
 ## Basic  Schoener's D is calculated for single variable. 
 ## But here, I want to calculate Shoener's D for multiple variables.
 
+library(ggplot2)
 source("Y:\\R scripts\\1 Acaena project\\Modified\\06_2_function_NicheOverlap_EnvSpace_Map.R")
 
 # Data import
-da1 <- read.csv("Y:\\Chionochloa_bioclim_landcover_history_inclNAonland.csv")
+da1 <- read.csv("Y:\\2nd chapter_phylogentic niche conservation\\meta data\\Chionochloa_bioclim_landcover_history_inclNAonland.csv")
 d <- da1[is.na(da1$landCoverChange) == F, ]
 
 # sp names
@@ -36,8 +37,6 @@ extent_y = c(min(scores$PC2), max(scores$PC2))
 #########################################################################################
 ## Plot environmental space with schoener D value and histgrams of each axis
 #########################################################################################
-
-library(ggplot2)
 
 ######################################################
 ### Plot occurrence records of each species

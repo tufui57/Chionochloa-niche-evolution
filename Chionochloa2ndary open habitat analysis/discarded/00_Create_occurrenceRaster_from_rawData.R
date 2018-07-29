@@ -1,4 +1,5 @@
 # Import species occurrence data
+genus_name = "Acaena"
 source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//F02_clean_up_species_records.R")
 
 ### Get rid of species whose occurren resords < 5

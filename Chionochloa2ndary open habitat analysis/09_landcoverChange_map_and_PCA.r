@@ -1,29 +1,38 @@
 ##############################################################################################
 ###     Draw maps for each sp coloured by land cover change     ###
 ##############################################################################################
-
+library(dplyr)
 genus_name <- "Chionochloa"
 
-source(".\\Chionochloa niche evolution\\Chionochloa2ndary open habitat analysis\\11_Data_preparation_for_drawing_EnvSpace_and_Maps.r")
+source(".\\functions\\F_plot_map_and_PCA.r")
+source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//11_Data_preparation_for_drawing_EnvSpace_and_Maps.R")
 
+# PCA scores
+load(".//scores_chion.data")
+# Species occurrences
+dat <- read.csv(paste("Y://2nd chapter_phylogentic niche conservation//meta data//", genus_name, "_bioclim_landcover_history_worldclim1_1km.csv", sep=""))
+dat <- dat[is.na(dat$landCoverChange) == F, ]
+
+spname <-  grepl(paste("^", genus_name, sep=""), colnames(dat)) %>% colnames(dat)[.]
+  
 ###############################################################
 ## Point map for landcover change of sp 
 ###############################################################
 
 ## Plot map for all species of target genus
-chdata$allsp <- ifelse(rowSums(chdata[, spname]) > 0, 1, 0)
+dat$allsp <- ifelse(rowSums(dat[, spname]) > 0, 1, 0)
 
-map_plot_colourByLandcover("allsp", chdata)
-map_plot_monoColour("allsp", chdata)
+map_plot_colourByLandcover("allsp", dat)
+map_plot_monoColour("allsp", dat)
 
 ## Plot map for a species
-chdata2 <- lapply(spname, function(i){
-  chdata[chdata[,i] == 1,]
+dat2 <- lapply(spname, function(i){
+  dat[dat[,i] == 1,]
   }
   )
 
 maps <- lapply(1:length(spname), function(i){
-  map_plot_monoColour(spname[i], chdata2[[i]])
+  map_plot_monoColour(spname[i], dat2[[i]])
   })
 
 
@@ -78,15 +87,15 @@ dev.off()
 genus_name <- "Chionochloa"
 source(".\\Chionochloa niche evolution\\Chionochloa2ndary open habitat analysis\\11_Data_preparation_for_drawing_EnvSpace_and_Maps.r")
 ## Plot niche space for all species of target genus
-chdata$allsp <- ifelse(rowSums(chdata[, spname]) > 0, 1, 0)
-chion_m <- map_plot_monoColour("allsp", chdata)
+dat$allsp <- ifelse(rowSums(dat[, spname]) > 0, 1, 0)
+chion_m <- map_plot_monoColour("allsp", dat)
 
 
 genus_name <- "Acaena"
 source(".\\Chionochloa niche evolution\\Chionochloa2ndary open habitat analysis\\11_Data_preparation_for_drawing_EnvSpace_and_Maps.r")
 ## Plot niche space for all species of target genus
-chdata$allsp <- ifelse(rowSums(chdata[, spname]) > 0, 1, 0)
-aca_m <- map_plot_monoColour("allsp", chdata)
+dat$allsp <- ifelse(rowSums(dat[, spname]) > 0, 1, 0)
+aca_m <- map_plot_monoColour("allsp", dat)
 
 # Plot the two figures in a panel
 png("Y://monocolour_map_Acaena_Chion.png", width = 1000, height = 800)
