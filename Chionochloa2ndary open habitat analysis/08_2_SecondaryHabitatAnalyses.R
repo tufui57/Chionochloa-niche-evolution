@@ -26,12 +26,12 @@ genus_tag = "acaena"
 # d$tag <- d$tag$tag %>% toupper
 # 
 library(ggplot2)
-source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
+source(".//functions//F_plotAnalysis_clade_niche.R")
 
 #################################################################################
 ### Use original data set (but unreproducible) for regression figures
 #################################################################################
-dat <- read.csv("Y://Acaena project//Acaena_elevation.csv")
+dat <- read.csv("Y://1st chpater_Acaena project//meta data//Acaena_elevation.csv")
 
 summary(glm(proportionSecondaryHabitat ~ log10.current_range + 
               mean_elevation + X10km_average_abailability + Preference_open_habitat +
@@ -39,6 +39,30 @@ summary(glm(proportionSecondaryHabitat ~ log10.current_range +
               type + unlist.med1. + unlist.med2.,
             data = dat)
 )
+
+# # No combined life form-dispersal ability but dispersal ability
+# summary(glm(proportionSecondaryHabitat ~ log10.current_range + 
+#               mean_elevation + X10km_average_abailability + Preference_open_habitat +
+#               niche_volume + shoenners_D + 
+#               barb_section + unlist.med1. + unlist.med2.,
+#             data = dat)
+# )
+# 
+# # No medians of PC axes
+# summary(glm(proportionSecondaryHabitat ~ log10.current_range + 
+#               mean_elevation + X10km_average_abailability + Preference_open_habitat +
+#               niche_volume + shoenners_D + 
+#               type,
+#             data = dat)
+# )
+# 
+# # No combined life form-dispersal ability but dispersal ability and no medians of PC axes
+# summary(glm(proportionSecondaryHabitat ~ log10.current_range + 
+#               mean_elevation + X10km_average_abailability + Preference_open_habitat +
+#               niche_volume + shoenners_D + 
+#               barb_section,
+#             data = dat)
+# )
 
 ########################################################
 ###  Proportion of Secondary Open Habitat - current range size
