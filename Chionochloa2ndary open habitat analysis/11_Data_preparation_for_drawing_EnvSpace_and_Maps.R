@@ -10,19 +10,19 @@ library(grid)
 library(raster)
 library(rgdal)
 
-source(".\\Acaena niche evolution\\F_plot_map_and_PCA.r")
+source(".\\functions\\F_plot_map_and_PCA.r")
 
 if(genus_name == "Chionochloa"){
   genus_tag <- "chion"
   
   # data import
-  chdata <- read.csv(paste("Y://Acaena project//", genus_name, "_bioclim_landcover_history_inclNAonland.csv", sep = ""))
+  chdata <- read.csv(paste("Y://1st chpater_Acaena project//meta data//", genus_name, "_bioclim_landcover_history_inclNAonland.csv", sep = ""))
 }
 
 if(genus_name == "Acaena"){
   genus_tag <- "acaena"
   # data import
-  chdata <- read.csv(paste("Y://Acaena project//", genus_name, "_bioclim_landcover_history_inclNAonland.csv", sep = ""))
+  chdata <- read.csv(paste("Y://1st chpater_Acaena project//meta data//", genus_name, "_bioclim_landcover_history_inclNAonland.csv", sep = ""))
   
 }
 

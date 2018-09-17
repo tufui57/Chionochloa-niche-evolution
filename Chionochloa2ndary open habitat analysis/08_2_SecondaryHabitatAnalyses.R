@@ -11,9 +11,9 @@ genus_tag = "acaena"
 
 # # Import data
 # if(
-#   file.exists(paste("Y://Acaena project//", genus_tag, "_data_analyses.csv", sep = ""))
+#   file.exists(paste("Y://1st chpater_Acaena project//meta data//", genus_tag, "_data_analyses.csv", sep = ""))
 # ){
-#   d <- read.csv(paste("Y://Acaena project//", genus_tag, "_data_analyses.csv", sep = ""))
+#   d <- read.csv(paste("Y://1st chpater_Acaena project//meta data//", genus_tag, "_data_analyses.csv", sep = ""))
 # }else{
 #   source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//06_table_of_landcoverHistory_for_analyses.R")
 #   source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//06_2_calculate_indices_for_analyses.R")

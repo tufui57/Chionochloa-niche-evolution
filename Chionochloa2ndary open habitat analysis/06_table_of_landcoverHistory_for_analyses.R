@@ -10,7 +10,7 @@ source("Y://R scripts//Scripts for Practice and ones written by someone else//cb
 ########################################################
 
 ### Summary of pre-human land cover for each sp
-dat <- read.csv(paste("Y://", genus_name, "_bioclim_landcover_history_worldclim1_1km.csv", sep=""))
+dat <- read.csv(paste("Y://", genus_name, "_bioclim_landcover_history_worldclim1_1km13sep.csv", sep=""))
 dat <- dat[is.na(dat$landCoverChange) == F, ]
 
 # sp names
@@ -61,5 +61,5 @@ landcover <- lapply(spname, function(i){
 landcover2 <- cbind.fill(landcover)
 colnames(landcover2) <- spname
 
-write.csv(t(rbind(spsum, landcover2)), paste("Y://", genus_name, "_landscapeChangeHistory.csv", sep=""))
+write.csv(t(rbind(spsum, landcover2)), paste(".//", genus_name, "_landscapeChangeHistory.csv", sep=""))
 

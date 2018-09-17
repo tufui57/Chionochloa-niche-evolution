@@ -2,12 +2,10 @@
 ## Data preparation 
 ###############################################################
 
-genus_name = "Chionochloa"
+genus_name = "Acaena"
+
+setwd("C://Users//nomur//Documents")
 source(".\\Chionochloa niche evolution\\Chionochloa2ndary open habitat analysis\\11_Data_preparation_for_drawing_EnvSpace_and_Maps.r")
-
-splist <- read.csv(paste(".\\NicheVolume_age_", genus_tag, ".csv", sep = ""))
-
-spname <- (!is.na(splist$spname)) %>% splist$spname[.] %>% as.character
 
 ###############################################################
 ## Plot map and niche space 

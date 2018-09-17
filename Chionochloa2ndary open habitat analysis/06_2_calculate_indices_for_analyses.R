@@ -3,7 +3,7 @@
 ########################################################
 
 # Land cover change data
-gd <- read.csv(paste("Y://", genus_name, "_landscapeChangeHistory.csv", sep=""))
+gd <- read.csv(paste(".//", genus_name, "_landscapeChangeHistory.csv", sep=""))
 
 # Add land cover type "others"
 gd$nonF.others <- (gd$nonF.EF + gd$nonF.nonPotentialHabitat)
@@ -35,19 +35,19 @@ geoIncTable <- function(d, filepath){
   return(d)
 }
 
-geoIncTable(gd, paste("Y://Acaena project//", genus_name, "_data.csv", sep=""))
+geoIncTable(gd, paste(".//", genus_name, "_data.csv", sep=""))
 
 ########################################################
 ### Add species age, niche volume/overlap
 ########################################################
 
-gd <- read.csv(paste("Y://Acaena project//", genus_tag, "_data.csv", sep = ""))
+gd <- read.csv(paste(".//", genus_name, "_data.csv", sep = ""))
 
 # species age and niche volume
-if(file.exists(paste("Y:\\NicheVolume_age_", genus_tag,".csv", sep="")) == FALSE){
+if(file.exists(paste("Y:\\NicheVolume_age_", genus_name,".csv", sep="")) == FALSE){
   source(".//Chionochloa niche evolution//09_2_DataPreparation_for_Analysis.R")
 }
-ages <- read.csv(paste("Y:\\NicheVolume_age_", genus_tag,".csv", sep=""))
+ages <- read.csv(paste("Y:\\NicheVolume_age_", genus_name,".csv", sep=""))
 colnames(gd)[colnames(gd) == "X"] <- "spname"
 
 # Modify species name of species age dataframe
@@ -72,4 +72,4 @@ gd$speciesAge <- sapply(gd$spname, function(x){
   }
   )
             
-write.csv(gd, paste("Y://Acaena project//", genus_name, "_data_analyses.csv", sep = ""))
+write.csv(gd, paste(".//", genus_name, "_data_analyses.csv", sep = ""))
