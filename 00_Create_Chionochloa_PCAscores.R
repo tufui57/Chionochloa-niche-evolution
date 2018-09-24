@@ -3,7 +3,7 @@
 #########################################################
 
 # Data import
-alld <- read.csv("Y:\\Acaena project\\chionochloa_bioclim_landcover_1km.csv")
+alld <- read.csv("Y:\\Acaena project\\Chionochloa_bioclim_landcover_history_worldclim1_1km_24sep.csv")
 d <- alld[is.na(alld$bioclim1) == F, ]
 
 # sp names
@@ -29,4 +29,4 @@ scores <- data.frame(d[, c(paste("bioclim", c(1, 6, 12, 15), sep = ""), "x", "y"
                      pca$x[, 1:2]
 )
 
-save(scores, file = ".//Scores_chion.data")
+save(scores, file = ".//Scores_chion_24sep.data")

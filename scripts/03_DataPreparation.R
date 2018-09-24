@@ -36,8 +36,8 @@ if(genus_name == "Chionochloa"){
   sispairs <- sispairs[-c(1,8), ]
   
   # Load PCA data and clade paired PCA data
-  load(".//Scores_chion.data")
-  load(".//cladePairData_chion.data")
+  load(".//Scores_chion_24sep.data")
+  load(".//cladePairData_chion24sep.data")
 }
 
 if(genus_name == "Acaena"){
@@ -55,14 +55,13 @@ if(genus_name == "Acaena"){
   sispairs <- sispairs[-c(5,6), ]
   
   # Load PCA data and clade paired PCA data
-  load(".//Scores_acaena.data")
-  load(".//cladePairData_acaena.data")
-  
+  #load(".//Scores_acaena.data")
+  #load(".//cladePairData_acaena.data")
   
 }
 
 ### Load clade pair data
-source(".//Chionochloa niche evolution//06_Clade_pairing.R")
+source(".//Chionochloa niche evolution//F01_Clade_pairing.R")
 
 ### Extent of axes for plotting
 extent_x = c(min(scores$PC1), max(scores$PC1))
