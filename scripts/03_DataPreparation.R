@@ -35,9 +35,7 @@ if(genus_name == "Chionochloa"){
   # Omit no occurrence record species
   sispairs <- sispairs[-c(1,8), ]
   
-  # Load PCA data and clade paired PCA data
-  load(".//Scores_chion_24sep.data")
-  load(".//cladePairData_chion24sep.data")
+
 }
 
 if(genus_name == "Acaena"){
@@ -53,10 +51,6 @@ if(genus_name == "Acaena"){
   sispairs <- sislist[!duppair, ]
   # Omit no occurrence record species
   sispairs <- sispairs[-c(5,6), ]
-  
-  # Load PCA data and clade paired PCA data
-  #load(".//Scores_acaena.data")
-  #load(".//cladePairData_acaena.data")
   
 }
 

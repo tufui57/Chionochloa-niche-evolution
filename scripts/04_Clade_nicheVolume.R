@@ -3,6 +3,21 @@ genus_name <- "Chionochloa"
 
 source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 
+
+# Load PCA data and clade paired PCA data
+if(genus_name == "Chionochloa"){
+  
+  load(".//Scores_chion_24sep.data")
+  load(".//cladePairData_chion24sep.data")
+}
+
+if(genus_name == "Acaena"){  
+  
+  load(".//Scores_acaena.data")
+  load(".//cladePairData_acaena.data")
+  
+}
+
 ###################################################
 ### Clade niche volume
 ###################################################

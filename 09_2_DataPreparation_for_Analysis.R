@@ -2,13 +2,29 @@
 ### Clade niche overlap/volume
 ###################################################
 
+genus_name = "Acaena"
 
-source(".//Chionochloa niche evolution//00_DataPreparation.R")
-source(".//Chionochloa niche evolution//F01_calculate_node_age.R")
+source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
+source(".//functions//F_calculate_node_age.R")
+
+# Load PCA data and clade paired PCA data
+if(genus_name == "Chionochloa"){
+  
+  load(".//Scores_chion_24sep.data")
+  load(".//cladePairData_chion24sep.data")
+}
+
+if(genus_name == "Acaena"){  
+  
+  load(".//Scores_acaena.data")
+  load(".//cladePairData_acaena.data")
+  
+}
 
 #################################################################################
 ### Calculate node ages
 #################################################################################
+
 agesTipAndNode <- calculateNodeAge(tree)
 
 ###################################################################
