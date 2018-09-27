@@ -12,10 +12,12 @@ library(maptools)
 library(rgeos)
 
 # Data import
-d1 <- read.csv(paste("Y://", genus_name, "_bioclim_landcover_history_worldclim1_", reso, "km.csv", sep="")
+d1 <- read.csv(paste("Y://2nd chapter_phylogentic niche conservation//meta data//", genus_name, "_bioclim_landcover_history_worldclim1_", reso, "km.csv", sep="")
                )
 
 d <- d1[!is.na(d1$bioclim1), ]
+
+sname <- colnames(d)[grep(paste("^", genus_name, sep = ""), colnames(d))]
 
 # Reference raster
 ref <- raster("Y:\\GIS map and Climate data\\worldclim\\bio_411NZTM\\bio1_411.bil")
@@ -31,33 +33,40 @@ nzland2 <- crop(nzland, ref)
 ## Plot niche space with histograms
 ###############################################################
 
-niche_plot <- function(i, # number of sp in sname
-                     scores # data for niche space
+subset.data <- function(i, # character string of species name
+                       scores, # data for niche space
+                       colname.to.draw # character string. Colname of the data to colour
 ) {
-  #####################
-  # niche space
-  #####################
+  ### Subset data
+  scores.s <- (scores[, i] == 1) %>% scores[., ]
   
-  # subset data for CPA axes of species including land use change column
-  scores.s <- scores[scores[,sname[i]]==1, ]
-  if(sum(scores.s$change == "nonPotentialHabitat" | scores.s$change == "NF-nonPotentialHabitat"| scores.s$change == "nonF-nonPotentialHabitat"| scores.s$change == "NF-EF" | scores.s$change == "NF-NF" | scores.s$change == "nonF-EF" | scores.s$change == "nonF-NF")>0){
-    scores.s2 <- scores.s[ - which(scores.s$change == "NF-nonPotentialHabitat"| scores.s$change == "nonF-nonPotentialHabitat"| scores.s$change == "NF-EF" | scores.s$change == "NF-NF" | scores.s$change == "nonF-EF" | scores.s$change == "nonF-NF"),]
+  if(sum(scores.s[, colname.to.draw] == "nonPotentialHabitat" | scores.s[, colname.to.draw] == "NF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "nonF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "NF-EF" | scores.s[, colname.to.draw] == "NF-NF" | scores.s[, colname.to.draw] == "nonF-EF" | scores.s[, colname.to.draw] == "nonF-NF")>0){
+    scores.s2 <- scores.s[ - which(scores.s[, colname.to.draw] == "NF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "nonF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "NF-EF" | scores.s[, colname.to.draw] == "NF-NF" | scores.s[, colname.to.draw] == "nonF-EF" | scores.s[, colname.to.draw] == "nonF-NF"),]
   }else{
     scores.s2 <- scores.s
   }
+  
+  return(scores.s2)
+}
 
-  # niche space
+niche_plot <- function(i, # number of sp in sname
+                     scores, # data for niche space
+                     colname.to.draw # character string. Colname of the data to colour
+) {
+
+  scores.s2 <- subset.data(i, scores, colname.to.draw)
+  
+  ### Plot niche
   pMain <- ggplot() +
     # plot all NZ data points
     geom_point(data = scores, aes(PC1, PC2), color = 'gray90', alpha = 0.25) +
     # point of each sp
-    geom_point(data = scores.s2, aes(PC1, PC2, colour = change), alpha = 0.1) +
+    geom_point(data = scores.s2, aes_string("PC1", "PC2", colour = colname.to.draw), alpha = 0.1) +
     # extent
     xlim(extent_x) +
     ylim(extent_y) +
     # change point colour and legend title and texts
     scale_colour_manual(
-      name="",
       # Name of each legend factor. 
       # This must be same factors as factors in "colname" of ggplot(aes(colour = colname)), otherwise no legend will be drawn.
       breaks = c("NF-nonF", "nonF-nonF"),
@@ -65,16 +74,21 @@ niche_plot <- function(i, # number of sp in sname
       # colours
       values = c("red", "blue")
     ) +
-    # legend position inside plot
+    # No legend
     theme(axis.title = element_text(size = 15),
       legend.position = "none",
       panel.background = element_rect(fill = 'gray96')
     )
   
+  
+  # Primary and secondary open occurrences
+  scores.secondary <- scores.s2[scores.s2[, colname.to.draw] == 'NF-nonF', ]
+  scores.primary <- scores.s2[scores.s2[, colname.to.draw] == 'nonF-nonF', ]
+  
   # Histogram of PC1 (x axis)
   pTop <- ggplot(scores.s2, aes(x = PC1)) +
-    geom_histogram(data = subset(scores.s2, change == 'NF-nonF'), fill = "red", alpha = 0.35) +
-    geom_histogram(data = subset(scores.s2, change == 'nonF-nonF'), fill = "blue", alpha = 0.35) +
+    geom_histogram(data = scores.secondary, fill = "red", alpha = 0.35) +
+    geom_histogram(data = scores.primary, fill = "blue", alpha = 0.35) +
     xlim(extent_x) +
     xlab(expression(hot %<->% cold)) +
     theme(axis.text.x = element_blank(),
@@ -87,8 +101,8 @@ niche_plot <- function(i, # number of sp in sname
   
   # Histogram of PC2 (y axis)
   pRight <- ggplot(scores.s2, aes(x = PC2)) +
-    geom_histogram(data = subset(scores.s2, change == 'NF-nonF'), fill = "red", alpha = 0.35) +
-    geom_histogram(data = subset(scores.s2, change == 'nonF-nonF'), fill = "blue", alpha = 0.35) +
+    geom_histogram(data = scores.secondary, fill = "red", alpha = 0.35) +
+    geom_histogram(data = scores.primary, fill = "blue", alpha = 0.35) +
     xlim(extent_y) +
     xlab(expression(dry %<->% wet)) +
     theme(
@@ -121,7 +135,7 @@ niche_plot <- function(i, # number of sp in sname
 #####################
 
 map_plot <- function(i, # number of sp in sname
-                     d # data for map
+                     data # data for map
                      ){
   
   #####################
@@ -133,6 +147,8 @@ map_plot <- function(i, # number of sp in sname
   if(sum(d.s$change == "nonPotentialHabitat" | d.s$change == "NF-nonPotentialHabitat"| d.s$change == "nonF-nonPotentialHabitat"| d.s$change == "NF-EF" | d.s$change == "NF-NF" | d.s$change == "nonF-EF" | d.s$change == "nonF-NF")>0){
   d.s <- d.s[ - which(d.s$change == "nonPotentialHabitat" | d.s$change == "NF-nonPotentialHabitat"| d.s$change == "nonF-nonPotentialHabitat"| d.s$change == "NF-EF" | d.s$change == "NF-NF" | d.s$change == "nonF-EF" | d.s$change == "nonF-NF"),]
   }
+  d.s <- subset.data(i, d, colname.to.draw)
+  
   
   # Convert land use change column to numeric
   d.s$changeNo <- NA
@@ -229,8 +245,8 @@ i=16
 png(paste("Y://niche_map_3sp", sname[i], ".png"), width = 800, height = 1300)
 
 pMain1 <- niche_plot(i, # number of sp in sname
-                   scores,# data for niche space
-                   D = sch[sch$X==sname[i], "corrected.D"])
+                   scores # data for niche space
+                   )
 pMap1 <- map_plot(i, d)
 title1 <- textGrob(gsub("_", " ", sname[i]), gp=gpar(fontface="bold", cex=1.75))
 spi <- grid.arrange(pMap1, pMain1, top = title1, ncol = 2, widths = c(3,5))

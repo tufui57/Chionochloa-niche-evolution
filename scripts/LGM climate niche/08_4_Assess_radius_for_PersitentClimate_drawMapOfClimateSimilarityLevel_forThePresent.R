@@ -14,6 +14,7 @@ scores$similarityLevel <- rowSums(scores[, grep("lgm", colnames(scores))])
 # This raster mustn't be used for resampling for 5km resolution.
 ref5 <- raster(paste("Y:\\GIS map and Climate data\\current_landcover", reso, "km.bil", sep=""))
 
+# Plot simialrity levels on NZ map
 similarityLevelRaster <- convert_dataframe_to_raster(ref = ref5, dat = scores,
                                                      coordinateCols = c("x", "y"),
                                                      cellvalueCol = "similarityLevel")
@@ -31,39 +32,23 @@ plot(similarityLevelRaster,
 dev.off()
 
 #################################################################################
-### Compare climate similarity levels
+### Ratio of lands with persistent climate
 #################################################################################
 
+# How many of the land in NZ have peristent climate?
+# Persistent climate is defined as the grid cells with similarity leve l>= 18.
 similarScore <- (scores$similarityLevel > 17) %>%  scores[.,]
 nrow(similarScore) / nrow(scores)
 
+# How many of the land in NZ currently have different climate from the LGM?
 nonsimilarScore <- (scores$similarityLevel == 0) %>%  scores[.,]
 nrow(nonsimilarScore) / nrow(scores)
 
-#################################################################################
-### Draw a map of climate similarity levels of LGM area
-#################################################################################
+# How many of the land in NZ have primary open area with persistent climate?
+similarScore <- (scores$similarityLevel > 17) %>%  scores[.,]
+primaryOpen.persistentClimate <- similarScore[similarScore$landCoverChange == "NF-nonF", ]
+nrow(primaryOpen.persistentClimate) / nrow(scores)
 
-### Not completed
+# How many of the persistent climate is found in primary open area?
+nrow(primaryOpen.persistentClimate) / nrow(similarScore)
 
-# scores$similarityLevel <- rowSums(scores[, grep("lgm", colnames(scores))])
-# 
-# # Reference raster of coordinate system & extent
-# # This raster mustn't be used for resampling for 5km resolution.
-# ref5 <- raster(paste("Y:\\GIS map and Climate data\\current_landcover", reso, "km.bil", sep=""))
-# 
-# similarityLevelRaster <- convert_dataframe_to_raster(ref = ref5, dat = scores,
-#                                                      coordinateCols = c("x", "y"),
-#                                                      cellvalueCol = "similarityLevel")
-# 
-# # Colour gradient for raster
-# colfunc <- colorRampPalette(c("cyan", "dodgerblue4"))
-# 
-# png("Y:\\ClimateSimilarityLavel_sinceLGM.png")
-# 
-# plot(similarityLevelRaster,
-#      col=colfunc(21),
-#      axes=FALSE, box=FALSE,
-#      legend.args=list(text='Climate similarity', side=4, font=2, line=2.5, cex=0.8)
-# )
-# dev.off()

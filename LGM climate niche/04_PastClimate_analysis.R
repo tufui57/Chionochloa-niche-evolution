@@ -24,8 +24,10 @@ library(raster)
 library(rgdal)
 library(rgeos)
 
-source(".//Acaena niche evolution//F_plotAnalysis_clade_niche.R")
+source(".//functions//F_plotAnalysis_clade_niche.R")
 
+# Resolution of grid
+reso = 5
 
 # Choose past data
 time <- #"lig_30s_bio"
@@ -35,9 +37,6 @@ time <- #"lig_30s_bio"
 ### Choose bioclim variables. Use the following bioclim variables to draw PCA.
 #"bioclim1", "bioclim6", "bioclim12", "bioclim15"
 vars <- c(1,6,12,15)
-
-# Load past PCA scores with the LGM neighbourhood data
-load(paste(".//currentNicheSimilarToLGM_", a,"_", genus_tag, "_", reso, "km.data", sep = ""))
 
 # Create genus tag
 if(genus_name == "Chionochloa"){
@@ -49,14 +48,12 @@ if(genus_name == "Acaena"){
 }
 
 # Load current PCA scores with land cover change history
-load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
-           Worldclim, "_", reso, "km.data", sep = ""
+load(paste(".\\Scores_", genus_tag,"_landcover_worldclim1_", reso, "km.data", sep = ""
 )
 )
 
 # Load LGM PCA scores
-load(paste(".\\LGM_mainisland_worldclim",
-           Worldclim, "_", reso, "km_scores.data", sep = "")
+load(paste(".\\LGM_mainisland_worldclim1_", reso, "km_scores.data", sep = "")
 )
 
 #################################################################################
@@ -66,20 +63,8 @@ load(paste(".\\LGM_mainisland_worldclim",
 # Add cell ID to current PCA scores
 scores$cellID <- 1:nrow(scores)
 
-# Add availability of climate niche in LGM to current PCA scores
-# neighbours$dat2cellID has cell ID of the "scores" object.
-# Thus, rows of "scores" whose cell ID are found in "neighbours$dat2cellID" are considered to be similar to LGM climate
-
-scoresLGM <- mutate(scores, lgm = ifelse(scores$cellID %in% neighbours$dat2cellID, 1, 0))
-
-# Persistent climate; climate that is shared between LGM and the present. 
-persistentClimate <- scoresLGM[scoresLGM$lgm == 1, ]
-
-# Persistent climate of open habitat; persistent climate in primary open habitat
-persistentHabitatPersistentClimate <- persistentClimate[persistentClimate[,"landCoverChange"] == "nonF-nonF", ] 
-
 # Primary open habtat
-primary <- scoresLGM[scoresLGM[, "landCoverChange"] == "nonF-nonF", ]
+primary <- scores[scores[, "landCoverChange"] == "nonF-nonF", ]
 
 # Species name
 spname <- grepl(genus_name, colnames(scores)) %>% colnames(scores)[.]

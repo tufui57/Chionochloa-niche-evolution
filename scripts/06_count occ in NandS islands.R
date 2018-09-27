@@ -21,6 +21,8 @@ sland <- readOGR(path, LAYERS)
 ### Create raster from points of occurrence records
 #######################################################
 
+genus_name = "Chionochloa"
+
 source(".\\functions\\F02_clean_up_species_records18Sep.R")
 
 # Get rid of species whose occurren resords < 5
@@ -42,18 +44,49 @@ spRaster <- lapply(dat2, project_and_convert_occurrencePoints_to_raster, refWGS 
 
 
 ### Clip occurrence record rasters by polygons
-ras.nland <- lapply(spRaster, mask, mask = nland)
-nn <- lapply(ras.nland, function(x){sum(x[], na.rm=T)})
 
-ras.sland <- lapply(spRaster, mask, mask = sland)
-sn <- lapply(ras.sland, function(x){sum(x[], na.rm=T)})
+# Rasterize polygon
+
+# The raster to crop polygon must has values
+cr <- crop(spRaster[[3]], extent(nland))
+n.ras_polygon <- rasterize(nland, cr)  
+# replace all non-NA values to 1
+n.ras_polygon[!is.na(n.ras_polygon[])] <- 1
+
+# Clip by the rasterized polygon
+n.occ <- lapply(spRaster, function(x){
+  
+  cr <- crop(x, extent(nland))
+  res <- cr*n.ras_polygon
+  }
+  )
+# Count number of occurrences in North island
+nn <- lapply(n.occ, function(x){sum(x[], na.rm=T)})
+
+
+
+# The raster to crop polygon must has values
+cr <- crop(spRaster[[3]], extent(sland))
+s.ras_polygon <- rasterize(sland, cr)  
+# replace all non-NA values to 1
+s.ras_polygon[!is.na(s.ras_polygon[])] <- 1
+
+# Clip by the rasterized polygon
+s.occ <- lapply(spRaster, function(x){
+  
+  cr <- crop(x, extent(sland))
+  res <- cr*s.ras_polygon
+}
+)
+# Count number of occurrences in North island
+sn <- lapply(s.occ, function(x){sum(x[], na.rm=T)})
 
 alln <- lapply(spRaster, function(x){sum(x[], na.rm=T)})
 
 
 table.occ <- cbind(unlist(nn), unlist(sn), unlist(alln))
-rownames(rr) <- gsub(".asc","", f[grep("^Acaena.*asc$", f)])
-colnames(rr) <- c("N","S")
+rownames(rr) <- spname
+colnames(rr) <- c("N", "S", "all")
 write.csv(rr, "Y://count_species_occ_NS_island.csv")
 
 
@@ -61,28 +94,28 @@ write.csv(rr, "Y://count_species_occ_NS_island.csv")
 #### Count cells in each habitat of N/S island
 ##############################################################################
 
-da1 <- read.csv("Y:\\2nd category\\alldata_Acaena1kmGrid_inclNAonland_2ndCategory.csv")
+dat <- read.csv("Y:\\Chionochloa_bioclim_landcover_history_worldclim1_1km_24sep.csv")
 
 # summary no. of cells depending on land use history
-table(da1$change)
+table(dat$change)
 
 # refernce raster
 bio15 <- raster("Y:\\ASCII_files\\bioclim15NZTM.asc")
 
 ### Crop raster of land use change by N/S island
 
-points <- da1[, c("NZTMlon", "NZTMlat")]
-points$change <- ifelse(da1$change=="nonF-nonF", 1,
-                        ifelse(da1$change=="NF-nonF", 2,
-                               ifelse(da1$change=="NF-NF",3,
-                                      ifelse(da1$change=="nonF-NF",4,
-                                             ifelse(da1$change=="nonF-EF",5,
-                                                    ifelse(da1$change=="NF-EF",6,
-                                                           ifelse(da1$change=="nonF-nonPotentialHabitat",7,
+points <- dat[, c("NZTMlon", "NZTMlat")]
+points$change <- ifelse(dat$change=="nonF-nonF", 1,
+                        ifelse(dat$change=="NF-nonF", 2,
+                               ifelse(dat$change=="NF-NF",3,
+                                      ifelse(dat$change=="nonF-NF",4,
+                                             ifelse(dat$change=="nonF-EF",5,
+                                                    ifelse(dat$change=="NF-EF",6,
+                                                           ifelse(dat$change=="nonF-nonPotentialHabitat",7,
                                                                   8)))))))
 
 # point coordinate setting
-coordinates(points) <- da1[, c("NZTMlon", "NZTMlat")]
+coordinates(points) <- dat[, c("NZTMlon", "NZTMlat")]
 proj4string(points) <- proj4string(bio15)
 # rasterize points
 pr <- rasterize(points, bio15, field = points$change, fun = max, background = NA)
@@ -114,7 +147,7 @@ resS <- pr_crop*rsland
 
 
 # save
-nz <- table(da1$change)
+nz <- table(dat$change)
 t <- cbind(table(resN[]), table(resS[]))
 t<-t[-1,]
 t2 <- cbind(nz[c(7,3,2,6,5,1,8,4)], t)

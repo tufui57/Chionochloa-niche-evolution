@@ -50,31 +50,11 @@ load(paste(".\\LGM_mainisland_worldclim",
 load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
            worldclim, "_", reso, "km.data", sep = ""))
 
-# Persistent climate
-load(paste(".//currentNicheSimilarToLGM_", a,"_", reso, "km.data", sep = ""))
-
 # Add cell ID
 scores$cellID <- 1:nrow(scores)
 
-### Add climate similarity to the LGM to current climate data frame
-# neighbours$dat2cellID has cell ID of "scores" object. 
-# SO, rows of "scores" whose cell ID are in "neighbours$dat2cellID" are the cells with similar climate to the LGM.
-
-scoresLGM <- mutate(scores, lgm = ifelse(scores$cellID %in% neighbours$dat2cellID, 1, 0))
-
-# Persistent climate; current climate similar to the LGM. 
-scoresLGM2 <- scoresLGM[scoresLGM$lgm == 1, ]
-
-
-
-########################################################################################################################
-### Definition of persistent climate has changed. So, change the following object too. 
-########################################################################################################################
-# # Persistent climate of open habitat; persistent climate in primary open habitat
-# persistentOpenHabitat <- scoresLGM2[scoresLGM2[,"landCoverChange"] == "nonF-nonF", ] 
-
 # Primary open habtat
-primary <- scoresLGM[scoresLGM[, "landCoverChange"] == "nonF-nonF", ]
+primary <- scores[scores[, "landCoverChange"] == "nonF-nonF", ]
 
 
 #################################################################################
@@ -92,16 +72,6 @@ pMain <- ggplot() +
 
 ggsave(paste("Y://",time, "_and_current.png", sep = ""), pMain, width = 100, height = 80, units = "mm")
 
-#################################
-### Plot persisitent Climate
-#################################
-pMain <- ggplot() +
-  # plot all NZ data points
-  geom_point(data = scores, aes(PC1, PC2), color = 'gray80', alpha = 0.25) +
-  geom_point(data = scoresLGM2, aes(PC1, PC2), color = 'yellow', alpha = 0.25) +
-  ggtitle("Persistent")
-
-ggsave(paste("Y://", time, "_persistentClimate.png", sep = ""), pMain, width = 100, height = 80, units = "mm")
 
 ##################################################################
 ### Plot primary open habitat and LGM climate space 
@@ -116,14 +86,3 @@ p <- ggplot() +
 
 ggsave(paste("Y://", time, "_primaryOpenHabitat.png", sep = ""), p, width = 100, height = 80, units = "mm")
 
-##################################################################
-### Plot persistent climate space Where has been available since LGM 
-##################################################################
-
-p2 <- ggplot() +
-  # plot all NZ data points
-  geom_point(data = scores, aes(PC1, PC2), color = 'gray80', alpha = 0.25) +
-  geom_point(data = persistentOpenHabitat, aes(PC1, PC2), color = 'red', alpha = 0.25) +
-  ggtitle("Persistent climate of open habitat")
-
-ggsave(paste("Y://", time, "_persistentOpenHabitat.png", sep = ""), p2, width = 100, height = 80, units = "mm")
