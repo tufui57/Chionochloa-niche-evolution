@@ -28,7 +28,7 @@ if(genus_name == "Acaena"){
 ########################################
 # Data import
 da1 <- read.csv(paste("Y://", genus_name, "_bioclim_landcover_history_worldclim",
-                      Worldclim, "_", reso, "km.csv", sep = ""
+                      Worldclim, "_", reso, "km_24sep.csv", sep = ""
                       )
                 )
 d <- da1[is.na(da1$landCoverChange) == F, ]

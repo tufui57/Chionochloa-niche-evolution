@@ -3,11 +3,14 @@
 #########################################################
 
 # Data import
-alld <- read.csv("Y:\\Chionochloa_bioclim_landcover_history_worldclim1_1km_24sep.csv")
+
+alld <- read.csv(paste("Y:\\", genus_name, "_bioclim_landcover_history_worldclim1_1km.csv",
+                 sep="")
+                 )
 d <- alld[is.na(alld$bioclim1) == F, ]
 
 # sp names
-sname <- colnames(d)[grepl("^Chion", colnames(d))]
+sname <- colnames(d)[grepl(paste("^", genus_name, sep=""), colnames(d))]
 
 # Replace NA with 0
 for(i in sname){
@@ -39,5 +42,8 @@ scores$current <- factor(ifelse(scores$currentLandcover == 1, "NF",
 )
 
 
-
-save(scores, file = ".//Scores_chion_24sep.data")
+# Save the PCA scores
+save(scores, file = paste(".\\Scores_", genus_name,"_landcover_worldclim",
+                          worldclim, "_", reso, "km.data", sep = ""
+)
+)

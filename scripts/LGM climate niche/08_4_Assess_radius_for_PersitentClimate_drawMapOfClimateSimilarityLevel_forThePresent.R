@@ -1,5 +1,8 @@
 
-source(".//Chionochloa niche evolution//LGM climate niche//08_1_Assess_radius_for_PersitentClimate_DataPreparation.R")
+# Give genus name before running the following scripts
+genus_name = "Acaena"
+
+source(".//Chionochloa niche evolution//scripts//LGM climate niche//08_1_Assess_radius_for_PersitentClimate_DataPreparation.R")
 source(".//functions//F_speciseNameCleaning_spnameFromPhylogenyTree.r")
 source(".//functions//F02_create_raster_from_dataframe.R")
 library(raster)
@@ -31,24 +34,5 @@ plot(similarityLevelRaster,
      )
 dev.off()
 
-#################################################################################
-### Ratio of lands with persistent climate
-#################################################################################
 
-# How many of the land in NZ have peristent climate?
-# Persistent climate is defined as the grid cells with similarity leve l>= 18.
-similarScore <- (scores$similarityLevel > 17) %>%  scores[.,]
-nrow(similarScore) / nrow(scores)
-
-# How many of the land in NZ currently have different climate from the LGM?
-nonsimilarScore <- (scores$similarityLevel == 0) %>%  scores[.,]
-nrow(nonsimilarScore) / nrow(scores)
-
-# How many of the land in NZ have primary open area with persistent climate?
-similarScore <- (scores$similarityLevel > 17) %>%  scores[.,]
-primaryOpen.persistentClimate <- similarScore[similarScore$landCoverChange == "NF-nonF", ]
-nrow(primaryOpen.persistentClimate) / nrow(scores)
-
-# How many of the persistent climate is found in primary open area?
-nrow(primaryOpen.persistentClimate) / nrow(similarScore)
 

@@ -8,8 +8,8 @@ library(dplyr)
 source(".//functions//F_SchonnerDdataframeFormat.r")
 source(".//functions//F_speciseNameCleaning_spnameFromPhylogenyTree.r")
 
-genus_name <- "Acaena"
-"Chionochloa" # 
+genus_name <-  "Chionochloa"
+
 ###################################
 ### Data preparation
 ###################################
@@ -21,7 +21,11 @@ if(genus_name == "Acaena"){
 }
 
 # Data import
-load(paste(".//Scores_", genus_tag, ".data", sep=""))
+load(paste(".\\Scores_", genus_name,"_landcover_worldclim1_5km.data", sep = "")
+)
+
+### Omit NA from land cover data
+scores <- scores[!is.na(scores$landCoverChange),]
 
 # LGM climate
 load(paste(".\\LGM_mainisland_worldclim1_5km_scores.data", sep = "")
@@ -30,7 +34,7 @@ load(paste(".\\LGM_mainisland_worldclim1_5km_scores.data", sep = "")
 
 ### Schoenner's D between current climate of species occurrences within primary open habitat and LGM climate
 spname <- colnames(scores)[grep(paste("^", genus_name, sep = ""), colnames(scores))]
-primaryOpen <- scores[scores$landCoverChange == "NF-nonF",]
+primaryOpen <- scores[(scores$landCoverChange == "nonF-nonF"),]
 
 background <- rbind(scores[, c("PC1", "PC2")], newdf[, c("PC1", "PC2")])
 
@@ -58,6 +62,7 @@ for(i in spname){
   if(nrow(scores.sp2) > 5){
     scho[[i]] <- SchoenerD_ecospat(background, "PC1", "PC2", newdf, scores.sp2)
   }else{
+    print(paste(i, "has < 5 occurrences in primary open habitat at 5km resolution"))
     scho[[i]] <- "This species has < 5 occurrences"
   }
   
@@ -67,27 +72,4 @@ scho2 <- lapply(scho[scho != "This species has < 5 occurrences"], "[[", 1)
 write.csv(do.call(rbind, scho2), file = paste(".//PersistentOccurrences_", genus_tag, ".csv", sep=""))
 
 
-
-#################################################################################################################
-## Compare the above Schoenner's D with the proportion of occurrences within open area with persistent climate
-#################################################################################################################
-
-persistent0.045 <- read.csv(".//persistentRatio_age_chion5km0.045.csv")
-schoD <- read.csv(paste(".//PersistentOccurrences_", genus_tag, ".csv", sep=""))
-
-persistent0.045_2 <- merge(persistent0.045, schoD, by.x="spname", by.y="X")
-
-# Name tag
-tag <- makeTag_separate(persistent0.045_2$spname, genus_name, "_")
-
-### Plot
-png(paste(".//persistentRatio_chion_0.045_vs_schonnerD_", genus_tag, ".png", sep=""), width = 800, height = 500)
-plot(persistent0.045_2$D, persistent0.045_2$persistentRatio,
-     xlab = "Schoener's D", ylab = "Radius = 0.045",
-     main = "Proportion of species occurrences within open area with persistent climate"
-)
-text(persistent0.045_2$D, persistent0.045_2$persistentRatio, labels = tag$tag, cex = 1.2, pos=1)
-dev.off()
-
-summary(lm(persistent0.045_2$D ~ persistent0.045_2$persistentRatio))
 

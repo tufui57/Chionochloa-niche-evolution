@@ -1,22 +1,15 @@
 
-genus_name <- "Chionochloa"
+genus_name <- "Acaena"
+genus_tag <- "acaena"
 
 source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 
-
 # Load PCA data and clade paired PCA data
-if(genus_name == "Chionochloa"){
-  
-  load(".//Scores_chion_24sep.data")
-  load(".//cladePairData_chion24sep.data")
-}
+load(
+  paste(".\\Scores_", genus_name,"_landcover_worldclim1_1km.data", sep = "")
+)
+load(paste(".//cladePairData_", genus_tag,".data", sep = ""))
 
-if(genus_name == "Acaena"){  
-  
-  load(".//Scores_acaena.data")
-  load(".//cladePairData_acaena.data")
-  
-}
 
 ###################################################
 ### Clade niche volume
@@ -86,5 +79,5 @@ nichevoldata <- nichevoldata %>%
 
 colnames(nichevoldata)[1:4] <- c("ecospat.corrected.D", "ecospat.corrected.I", "ecospat.uncorrected.D", "ecospat.uncorrected.I")
 
-write.csv(nichevoldata, paste(".//clade_nicheVolume_", genus_tag, "24sep.csv", sep = ""))
+write.csv(nichevoldata, paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
 

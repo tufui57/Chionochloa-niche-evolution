@@ -11,13 +11,21 @@ library(rgdal)
 library(maptools)
 library(rgeos)
 
+genus_name = "Chionochloa"
+reso = 1
+
+# Import PCA scores
+load(paste(".//Scores_", genus_name, "_landcover_worldclim1_", reso, "km.data", sep = ""))
+
 # Data import
 d1 <- read.csv(paste("Y://2nd chapter_phylogentic niche conservation//meta data//", genus_name, "_bioclim_landcover_history_worldclim1_", reso, "km.csv", sep="")
                )
+# Remove NA rows
+d <- d1[!is.na(d1$landCoverChange), ]
 
-d <- d1[!is.na(d1$bioclim1), ]
-
+# Species name
 sname <- colnames(d)[grep(paste("^", genus_name, sep = ""), colnames(d))]
+
 
 # Reference raster
 ref <- raster("Y:\\GIS map and Climate data\\worldclim\\bio_411NZTM\\bio1_411.bil")
@@ -38,9 +46,10 @@ subset.data <- function(i, # character string of species name
                        colname.to.draw # character string. Colname of the data to colour
 ) {
   ### Subset data
-  scores.s <- (scores[, i] == 1) %>% scores[., ]
+  scores1 <- scores[!is.na(scores[,i]), ] 
+  scores.s <- scores1[scores1[,i] == 1, ]
   
-  if(sum(scores.s[, colname.to.draw] == "nonPotentialHabitat" | scores.s[, colname.to.draw] == "NF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "nonF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "NF-EF" | scores.s[, colname.to.draw] == "NF-NF" | scores.s[, colname.to.draw] == "nonF-EF" | scores.s[, colname.to.draw] == "nonF-NF")>0){
+  if(sum(scores.s[, colname.to.draw] == "nonPotentialHabitat" | scores.s[, colname.to.draw] == "NF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "nonF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "NF-EF" | scores.s[, colname.to.draw] == "NF-NF" | scores.s[, colname.to.draw] == "nonF-EF" | scores.s[, colname.to.draw] == "nonF-NF", na.rm = TRUE)>0){
     scores.s2 <- scores.s[ - which(scores.s[, colname.to.draw] == "NF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "nonF-nonPotentialHabitat"| scores.s[, colname.to.draw] == "NF-EF" | scores.s[, colname.to.draw] == "NF-NF" | scores.s[, colname.to.draw] == "nonF-EF" | scores.s[, colname.to.draw] == "nonF-NF"),]
   }else{
     scores.s2 <- scores.s
@@ -49,7 +58,7 @@ subset.data <- function(i, # character string of species name
   return(scores.s2)
 }
 
-niche_plot <- function(i, # number of sp in sname
+niche_plot <- function(i, # character string of species name
                      scores, # data for niche space
                      colname.to.draw # character string. Colname of the data to colour
 ) {
@@ -134,46 +143,35 @@ niche_plot <- function(i, # number of sp in sname
 # Plot point map
 #####################
 
-map_plot <- function(i, # number of sp in sname
-                     data # data for map
-                     ){
-  
-  #####################
-  # Map
-  #####################
-  
-  # subset data for a species including land use change column
-  d.s <- d[d[, sname[i]]==1, ]
-  if(sum(d.s$change == "nonPotentialHabitat" | d.s$change == "NF-nonPotentialHabitat"| d.s$change == "nonF-nonPotentialHabitat"| d.s$change == "NF-EF" | d.s$change == "NF-NF" | d.s$change == "nonF-EF" | d.s$change == "nonF-NF")>0){
-  d.s <- d.s[ - which(d.s$change == "nonPotentialHabitat" | d.s$change == "NF-nonPotentialHabitat"| d.s$change == "nonF-nonPotentialHabitat"| d.s$change == "NF-EF" | d.s$change == "NF-NF" | d.s$change == "nonF-EF" | d.s$change == "nonF-NF"),]
-  }
+map_plot <- function(i, # character string of species name
+                     data, # data for map
+                     colname.to.draw # character string. Colname of the data to colour
+){
+
+  ### subset data for a species including land use change column
   d.s <- subset.data(i, d, colname.to.draw)
   
-  
-  # Convert land use change column to numeric
+  ### Convert data type of land use change column from character to numeric
   d.s$changeNo <- NA
-  d.s[d.s$change == "nonF-nonF", "changeNo"] <- 1
-  d.s[d.s$change == "NF-nonF", "changeNo"] <- 2
+  d.s[d.s[,colname.to.draw] == "nonF-nonF", "changeNo"] <- 1
+  d.s[d.s[,colname.to.draw] == "NF-nonF", "changeNo"] <- 2
   
-  # create point
-  pts <- d.s[, c("NZTMlon", "NZTMlat")]
-  
+  ### Create point object from coordinates
+  pts <- d.s[, c("x", "y")]
   # point coordinate system setting
-  coordinates(pts) <- d.s[, c("NZTMlon", "NZTMlat")]
+  coordinates(pts) <- d.s[, c("x", "y")]
   proj4pts <- proj4string(ref)
   proj4string(pts) <- CRS(proj4pts)
-  # land use change column
+  # Land use change column
   pts$changeNo <- d.s$changeNo
   
-  ############################
-  # Plot map & niche space
-  ############################
+  ### Map
   # ggplot for raster
   # http://zevross.com/blog/2014/07/16/mapping-in-r-using-the-ggplot2-package/
   pMap <- ggplot() +
-    geom_polygon(data=nzland2, aes(x=long, y=lat, group=group),colour="gray50", fill='gray90') +
+    geom_polygon(data = nzland2, aes(x = long, y = lat, group = group), colour = "gray50", fill='gray90') +
     
-    geom_point(data=d.s, aes(x=NZTMlon, y=NZTMlat, color=change), alpha = 0.1) +
+    geom_point(data = d.s, aes_string(x = "x", y = "y", color = colname.to.draw), alpha = 0.1) +
     
     scale_colour_manual(
       # title
@@ -183,11 +181,9 @@ map_plot <- function(i, # number of sp in sname
       # colours
       values = c("red", "blue")
     ) +
-    # http://stackoverflow.com/questions/16356052/control-ggplot2-legend-look-without-affecting-the-plot
-    guides(colour = guide_legend(override.aes = list(size = 5, shape=16, alpha=0.7))) +
+    guides(colour = guide_legend(override.aes = list(size = 5, shape = 16, alpha=0.7))) +
     
     labs(x="", y="") +
-    #ggtitle(gsub("_", " ", sname[i])) +
     # legend position inside plot at topleft
     theme(legend.text = element_text(size=15),
           legend.title = element_text(size=15),
@@ -212,24 +208,18 @@ lapply(seq(1,16,3), function(i){
   
   png(paste("Y://niche_map_3sp", sname[i], ".png", sep=""), width = 800, height = 1300)
   
-  pMain1 <- niche_plot(i, # number of sp in sname
-                     scores,# data for niche space
-                     D = sch[sch$X==sname[i], "corrected.D"])
-  pMap1 <- map_plot(i, d)
+  pMain1 <- niche_plot(sname[i], scores, "landCoverChange")
+  pMap1 <- map_plot(sname[i], d, "landCoverChange")
   title1 <- textGrob(gsub("_", " ", sname[i]), gp=gpar(fontface="bold", cex=1.75))
   spi <- grid.arrange(pMap1, pMain1, top = title1, ncol = 2, widths = c(3,5))
   
-  pMain2 <- niche_plot(i+1, # number of sp in sname
-                     scores,# data for niche space
-                     D = sch[sch$X==sname[i+1], "corrected.D"])
-  pMap2 <- map_plot(i+1, d)
+  pMain2 <- niche_plot(sname[i+1], scores, "landCoverChange")
+  pMap2 <- map_plot(sname[i+1], d, "landCoverChange")
   title2 <- textGrob(gsub("_", " ", sname[i+1]), gp=gpar(fontface="bold", cex=1.75))
   spi2 <- grid.arrange(pMap2, pMain2, top = title2, ncol = 2, widths = c(3,5))
   
-  pMain3 <- niche_plot(i+2, # number of sp in sname
-                     scores,# data for niche space
-                     D = sch[sch$X==sname[i+2], "corrected.D"])
-  pMap3 <- map_plot(i+2, d)
+  pMain3 <- niche_plot(sname[i+2], scores, "landCoverChange")
+  pMap3 <- map_plot(sname[i+2], d, "landCoverChange")
   title3 <- textGrob(gsub("_", " ", sname[i+2]), gp=gpar(fontface="bold", cex=1.75))
   spi3 <- grid.arrange(pMap3, pMain3, top = title3, ncol = 2, widths = c(3,5))
   
@@ -240,26 +230,4 @@ lapply(seq(1,16,3), function(i){
   dev.off()
   
 })
-
-i=16
-png(paste("Y://niche_map_3sp", sname[i], ".png"), width = 800, height = 1300)
-
-pMain1 <- niche_plot(i, # number of sp in sname
-                   scores # data for niche space
-                   )
-pMap1 <- map_plot(i, d)
-title1 <- textGrob(gsub("_", " ", sname[i]), gp=gpar(fontface="bold", cex=1.75))
-spi <- grid.arrange(pMap1, pMain1, top = title1, ncol = 2, widths = c(3,5))
-
-pMain2 <- niche_plot(i+1, # number of sp in sname
-                   scores,# data for niche space
-                   D = sch[sch$X==sname[i+1], "corrected.D"])
-pMap2 <- map_plot(i+1, d)
-title2 <- textGrob(gsub("_", " ", sname[i+1]), gp=gpar(fontface="bold", cex=1.75))
-spi2 <- grid.arrange(pMap2, pMain2, top = title2, ncol = 2, widths = c(3,5))
-
-# Plot in multiple panels
-grid.arrange(spi, spi2, nrow = 3)
-
-dev.off()
 

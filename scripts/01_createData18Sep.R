@@ -18,10 +18,10 @@ library(SDMTools)
 library(dplyr)
 
 # Give genus name
-genus_name <- "Chionochloa"
+genus_name <- "Acaena"
 
 # Give raster resolution (km)
-reso <- 1
+reso <- 5
 
 Worldclim <- 1
 # Give path of WORLDCLIM raster
@@ -58,13 +58,12 @@ if(file.exists(paste("Y:\\GIS map and Climate data\\pre-human_landcover", reso, 
 
 # WARNING; the following reference raster doesn't have enough raster values when you run this code in computers with insufficient disc space.
 # But it works as a reference raster to give reference extent and coordination system.
-
 ref.raster <- raster(
   # paste("Y:\\GIS map and Climate data\\pre-human_landcover", reso,"km.bil", sep=""
   #       )
   
   # This raster was converted from pre-human raster with ArcGIS using "majority" method for raster value assignment
-  "Y://GIS map and Climate data//newzealandpotentialvegetatio1.bil"
+     paste("Y://GIS map and Climate data//newzealandpotentialvegetatio", reso, ".bil", sep="")
 )
 
 ############################################################################################################
@@ -78,7 +77,7 @@ current_ras <- raster(
   # )
   
   # This raster was converted from current land cover polygon with ArcGIS using "maximum area" method for raster value assignment
-  "Y://GIS map and Climate data//lcdbv41landcoverdata2.bil"
+  paste("Y://GIS map and Climate data//lcdbv41landcoverdata", reso, "km.bil", sep="")
 )
 
 # Resample to adjust extent and number of cells
@@ -119,7 +118,7 @@ spRaster <- lapply(dat2, project_and_convert_occurrencePoints_to_raster, refWGS 
 # Make raster stack
 bio_land <- stack(c(bioNZ, spRaster, pre, current_ras2))
 
-source(".//Chionochloa niche evolution//scripts//02_elevation.R")
+source(".//Chionochloa niche evolution//scripts//01_2_elevation.R")
 
 res <- data.frame(cbind(coordinates(bio_land2[[1]]), values(bio_land2)))
 
@@ -135,6 +134,6 @@ d <- landCoverChange(res, prehuman_landcover="layer.1", current_landcover="layer
 d2 <- d[!is.na(d$bioclim1), ]
 
 write.csv(d2, file = paste("Y://", genus_name, "_bioclim_landcover_history_worldclim",
-                           Worldclim, "_", reso, "km_24sep.csv", sep=""
+                           Worldclim, "_", reso, "km.csv", sep=""
                            )
           )

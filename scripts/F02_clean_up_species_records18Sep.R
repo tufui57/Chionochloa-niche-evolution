@@ -10,8 +10,15 @@ library(dplyr)
 ##########################################################################################
 ####################           IMPORT DATA           #####################################
 ##########################################################################################
+if(genus_name == "Chinochloa"){
+  sp <- read.csv("Y:\\2nd chapter_phylogentic niche conservation\\meta data\\rdata_Chionochloa_all-occurances.csv")
+  
+}
 
-sp <- read.csv("Y:\\2nd chapter_phylogentic niche conservation\\meta data\\rdata_Chionochloa_all-occurances.csv")
+if(genus_name == "Acaena"){
+  sp <- read.csv("Y:\\2nd chapter_phylogentic niche conservation\\meta data\\rdata_Acaena_all-presence.csv")
+  
+}
 
 ##########################################################################################
 ####################   POINT VALIDATION  #################################################

@@ -2,6 +2,9 @@
 ### Get ordination scores of spcies climatic niche and pair them to their closest clade 
 ###########################################################################################
 
+# Choose genus
+genus_name <- "Chionochloa"
+
 ###################################################
 ### Data preparation
 ###################################################
@@ -12,7 +15,7 @@ library(dplyr)
 source(".//functions//F_generateClimateDataOfClades.R")
 source(".//functions/F_speciseNameCleaning_spnameFromPhylogenyTree.r")
 
-genus_name <- "Chionochloa"
+
 
 if(genus_name == "Chionochloa"){
   # Import phylogenetic tree data
@@ -28,8 +31,6 @@ if(genus_name == "Chionochloa"){
   # Omit no occurrence record species
   sispairs <- sispairs[-c(1,8), ]
   
-  # Load PCA data and clade paired PCA data
-  load(".//Scores_chion_24sep.data")
 }
 
 if(genus_name == "Acaena"){
@@ -46,9 +47,12 @@ if(genus_name == "Acaena"){
   # Omit no occurrence record species
   sispairs <- sispairs[-c(5,6), ]
   
-  # Load PCA data and clade paired PCA data
-  load(".//Scores_acaena.data")
 }
+
+# Load PCA data
+load(
+  paste(".\\Scores_", genus_name,"_landcover_worldclim1_1km.data", sep = "")
+)
 
 ### Load clade pair data
 source(".//Chionochloa niche evolution//F01_Clade_pairing.R")
@@ -101,6 +105,6 @@ names(cladedata) <- number
 
 cladedata <- cladedata[lapply(cladedata, class) == "list"]
 
-save(cladedata, file = paste(".//cladePairData_", genus_tag, "24sep.data", sep = ""))
+save(cladedata, file = paste(".//cladePairData_", genus_tag, ".data", sep = ""))
 
 

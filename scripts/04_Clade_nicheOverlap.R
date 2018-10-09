@@ -2,23 +2,15 @@
 ### Clade niche overlap/volume
 ###################################################
 
-genus_name <- "Chionochloa"
+genus_name <- "Acaena"
 
 source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 
 # Load PCA data and clade paired PCA data
-if(genus_name == "Chionochloa"){
-  
-  load(".//Scores_chion_24sep.data")
-  load(".//cladePairData_chion24sep.data")
-}
-
-if(genus_name == "Acaena"){  
-
-  load(".//Scores_acaena.data")
-  load(".//cladePairData_acaena.data")
-  
-}
+load(
+  paste(".\\Scores_", genus_name,"_landcover_worldclim1_1km.data", sep = "")
+)
+load(paste(".//cladePairData_", genus_tag,".data", sep = ""))
 
 ###################################################
 # Calculate niche overlap between sister clades
@@ -56,5 +48,5 @@ nodeNo <- sapply(cladedata, "[[", 5) %>% strsplit(., "\ ")
 scholist$node1 <- as.numeric(do.call(rbind, lapply(nodeNo, "[[",1)))
 scholist$node2 <- as.numeric(do.call(rbind, lapply(nodeNo, "[[",2)))
 
-write.csv(scholist, paste(".//clade_schoennerD_", genus_tag, "24sep.csv", sep = ""))
+write.csv(scholist, paste(".//clade_schoennerD_", genus_tag, ".csv", sep = ""))
 

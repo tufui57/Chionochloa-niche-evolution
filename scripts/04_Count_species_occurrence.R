@@ -11,7 +11,7 @@ genus_name <- "Acaena"
 #########################################################
 
 # Data import
-alld <- read.csv(paste("Y:\\", genus_name, "_bioclim_landcover_history_worldclim1_1km_24sep.csv", sep = ""))
+alld <- read.csv(paste("Y:\\", genus_name, "_bioclim_landcover_history_worldclim1_1km.csv", sep = ""))
 d <- alld[is.na(alld$bioclim1) == F, ]
 
 ### Make species name codes
@@ -55,5 +55,5 @@ reslist <- mutate(reslist, record = attr(chionl, "group_sizes")[sp %in% spname])
 # Add species name codes
 reslist <- mutate(reslist, tag = codes$tag[codes$X %in% spname])
 
-write.csv(reslist, file = paste(genus_name, "_species_list24sep.csv", sep = ""))
+write.csv(reslist, file = paste(genus_name, "_species_list.csv", sep = ""))
 

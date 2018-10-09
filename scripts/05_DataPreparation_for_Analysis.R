@@ -2,35 +2,29 @@
 ### Clade niche overlap/volume
 ###################################################
 
-genus_name = "Chionochloa"
+genus_name <- "Acaena"
+genus_tag <- "acaena"
 
 source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 source(".//functions//F_calculate_node_age.R")
 
 # Load PCA data and clade paired PCA data
-if(genus_name == "Chionochloa"){
-  
-  load(".//Scores_chion_24sep.data")
-  load(".//cladePairData_chion24sep.data")
-}
+load(
+  paste(".\\Scores_", genus_name,"_landcover_worldclim1_1km.data", sep = "")
+)
+load(paste(".//cladePairData_", genus_tag,".data", sep = ""))
 
-if(genus_name == "Acaena"){  
-  
-  load(".//Scores_acaena.data")
-  load(".//cladePairData_acaena.data")
-  
-}
 
 ###################################################################
 ###  Dataframe of Clade niche volume & age
 ###################################################################
 
 # Import data
-if(file.exists(paste(".//clade_nicheVolume_", genus_tag, "24sep.csv", sep = ""))){
-  volume <- read.csv(paste(".//clade_nicheVolume_", genus_tag, "24sep.csv", sep = ""))
+if(file.exists(paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))){
+  volume <- read.csv(paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
 }else{
   source(".//Chionochloa niche evolution//scripts//04_Clade_nicheVolume.R")
-  volume <- read.csv(paste(".//clade_nicheVolume_", genus_tag, "24sep.csv", sep = ""))
+  volume <- read.csv(paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
 }
 
 ### Calculate node ages
@@ -42,7 +36,7 @@ ageVolData <- cbind(extractAges, volume[order(volume$nodeID), ])
 colnames(ageVolData)[c(1,2,4)] <- c("speciesAge", "spname", "nicheVolume")
 
 write.csv(ageVolData[, c("nodeID", "spname", "nicheVolume", "speciesAge")], 
-          paste("NicheVolume_age_", genus_tag, "24sep.csv", sep = ""))
+          paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
 
 ################################################################################
 ### Dataframe of Clade niche overlap & divergence time
@@ -50,14 +44,14 @@ write.csv(ageVolData[, c("nodeID", "spname", "nicheVolume", "speciesAge")],
 
 # Import data
 
-if(file.exists(paste(".//clade_nicheVolume_", genus_tag, "24sep.csv", sep = ""))){
+if(file.exists(paste(".//clade_schoennerD_", genus_tag, ".csv", sep = ""))){
   
-  overlap <- read.csv(paste(".//clade_schoennerD_", genus_tag, "24sep.csv", sep = ""))
+  overlap <- read.csv(paste(".//clade_schoennerD_", genus_tag, ".csv", sep = ""))
   
 }else{
   
-  source(".//Chionochloa niche evolution//scripts//04_Clade_nicheVolume.R")
-  overlap <- read.csv(paste(".//clade_schoennerD_", genus_tag, "24sep.csv", sep = ""))
+  source(".//Chionochloa niche evolution//scripts//04_Clade_nicheOverlap.R")
+  overlap <- read.csv(paste(".//clade_schoennerD_", genus_tag, ".csv", sep = ""))
 
 }
 
@@ -111,4 +105,4 @@ leng <- sapply(1:nrow(overlapPdData), function(i){
 overlapPdData <- mutate(overlapPdData, divergenceTime = leng)
 
 write.csv(overlapPdData, 
-          paste("Nicheovrlap_PD_", genus_tag, "24sep.csv", sep = ""))
+          paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
