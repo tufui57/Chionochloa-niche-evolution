@@ -9,22 +9,6 @@
 genus_name = "Acaena"
 genus_tag = "acaena"
 
-# # Import data
-# if(
-#   file.exists(paste("Y://1st chpater_Acaena project//meta data//", genus_tag, "_data_analyses.csv", sep = ""))
-# ){
-#   d <- read.csv(paste("Y://1st chpater_Acaena project//meta data//", genus_tag, "_data_analyses.csv", sep = ""))
-# }else{
-#   source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//06_table_of_landcoverHistory_for_analyses.R")
-#   source(".//Chionochloa niche evolution//Chionochloa2ndary open habitat analysis//06_2_calculate_indices_for_analyses.R")
-#   d <- read.csv(paste("Y://Acaena project//", genus_tag, "_data_analyses.csv", sep = ""))
-# }
-# 
-# library(dplyr)
-# source(".//Acaena niche evolution/F_Create_Package_speciseNameCleaning.r")
-# d$tag <- makeTag_separate(d$spname, genus_name, "_")
-# d$tag <- d$tag$tag %>% toupper
-# 
 library(ggplot2)
 source(".//functions//F_plotAnalysis_clade_niche.R")
 
@@ -39,30 +23,6 @@ summary(glm(proportionSecondaryHabitat ~ log10.current_range +
               type + unlist.med1. + unlist.med2.,
             data = dat)
 )
-
-# # No combined life form-dispersal ability but dispersal ability
-# summary(glm(proportionSecondaryHabitat ~ log10.current_range + 
-#               mean_elevation + X10km_average_abailability + Preference_open_habitat +
-#               niche_volume + shoenners_D + 
-#               barb_section + unlist.med1. + unlist.med2.,
-#             data = dat)
-# )
-# 
-# # No medians of PC axes
-# summary(glm(proportionSecondaryHabitat ~ log10.current_range + 
-#               mean_elevation + X10km_average_abailability + Preference_open_habitat +
-#               niche_volume + shoenners_D + 
-#               type,
-#             data = dat)
-# )
-# 
-# # No combined life form-dispersal ability but dispersal ability and no medians of PC axes
-# summary(glm(proportionSecondaryHabitat ~ log10.current_range + 
-#               mean_elevation + X10km_average_abailability + Preference_open_habitat +
-#               niche_volume + shoenners_D + 
-#               barb_section,
-#             data = dat)
-# )
 
 ########################################################
 ###  Proportion of Secondary Open Habitat - current range size
