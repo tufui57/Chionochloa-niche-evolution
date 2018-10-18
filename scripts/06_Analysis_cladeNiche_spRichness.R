@@ -59,6 +59,10 @@ sisOverlapPd <- (overlapPdData$node1 %in% sispairs[,1]) %>% overlapPdData[., ]
 # Save the sister sepcies data
 write.csv(sisOverlapPd, file = paste(".//NicheOverlap_sister_", genus_tag, ".csv", sep=""))
 
+summary(
+  lm(nicheOverlap ~ divergenceTime, data = sisOverlapPd)
+)
+
 # Plot
 myplot <- plotAnalysis(data = sisOverlapPd, 
                        yv = "nicheOverlap", xv = "divergenceTime", 

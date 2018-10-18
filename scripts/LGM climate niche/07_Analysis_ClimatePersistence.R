@@ -7,10 +7,14 @@ source(".//functions//F_plotAnalysis_clade_niche.R")
 
 genus_tag = "acaena"
 
+### Import species age, niche volume and prevalence in persistent environment
 persistentRatio <- read.csv(paste("PersistentOccurrences_", genus_tag, ".csv", sep = ""))
+persistentRatio$X <- as.character(persistentRatio$X)
 speciesAge <- read.csv(paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
 
-persistence <- merge(persistentRatio, speciesAge, by.x = "X", by.y = "spname")
+colnames(persistentRatio)[1] <- "spname" 
+persistence <- merge(persistentRatio, speciesAge[!is.na(speciesAge$spname),], by = "spname", all.y = T)
+colnames(persistence)[colnames(persistence)=="D"] <- "persistentNiche"
 
 ##################################################
 ### Species age - Niche volume
@@ -24,14 +28,15 @@ myplot <- plotAnalysis(data = persistence,
                        xv = "speciesAge", yv = "D", 
                        nodeNumbercol = "nodeID", showStats = T,
                        xlabname = "Taxon age", 
-                       ylabname = "Occurrence ratio in persistent environment",
+                       ylabname = "Prevalence in persistent environment",
                        label.point = TRUE,
-                       genus_name = genus_tag
+                       genus_name = genus_tag, 
+                       cex=22
 ) +
   ylim(0, 0.5)
 
 # save
 ggsave(paste("Y:\\taxonVol_taxonAge_", genus_tag, ".png", sep = ""), plot = myplot,
-       width = 300, height = 210, units = 'mm')
+       width = 220, height = 150, units = 'mm')
 
 rm(myplot)
