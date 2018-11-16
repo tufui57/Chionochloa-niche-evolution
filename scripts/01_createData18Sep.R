@@ -21,7 +21,7 @@ library(dplyr)
 genus_name <- "Acaena"
 
 # Give raster resolution (km)
-reso <- 5
+reso <- 1
 
 Worldclim <- 1
 # Give path of WORLDCLIM raster
