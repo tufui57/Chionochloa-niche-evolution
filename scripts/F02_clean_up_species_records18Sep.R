@@ -10,7 +10,7 @@ library(dplyr)
 ##########################################################################################
 ####################           IMPORT DATA           #####################################
 ##########################################################################################
-if(genus_name == "Chinochloa"){
+if(genus_name == "Chionochloa"){
   sp <- read.csv("Y:\\2nd chapter_phylogentic niche conservation\\meta data\\rdata_Chionochloa_all-occurances.csv")
   
 }

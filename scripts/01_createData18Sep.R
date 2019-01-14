@@ -18,10 +18,10 @@ library(SDMTools)
 library(dplyr)
 
 # Give genus name
-genus_name <- "Acaena"
+genus_name <- "Chionochloa"
 
 # Give raster resolution (km)
-reso <- 1
+reso <- 5
 
 Worldclim <- 1
 # Give path of WORLDCLIM raster
