@@ -11,10 +11,15 @@ genus_name <- "Chionochloa"
 
 source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 
-ageVolData <- read.csv(paste("NicheVolume_age_", genus_tag, ".csv", sep = ""))
-overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
+### Import data
+ageVolData <- read.csv(paste("Y://NicheVolume_age_", genus_tag, ".csv", sep = ""))
+# overlapPdData <- read.csv(paste("Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
 
-## Count species richness within clades
+
+##############################################################################
+### Count species richness within clades
+##############################################################################
+
 nodeSp <- sapply(1:(length(tree$edge.length) + 1), count_spRichness, tree = tree)
 names(nodeSp) <- 1:(length(tree$edge.length) + 1)
 
@@ -79,3 +84,12 @@ ggsave(paste("Y:\\sister_divergenceTime_nicheoverlap_legend_", genus_tag, ".png"
        width = 300, height = 210, units = 'mm')
 
 rm(myplot)
+
+##############################################################################################
+### Clade niche volume ~ diversification rate (clade age / number of speices within clade)
+##############################################################################################
+ageVolSprich$divesificationRate <- log10(ageVolSprich$speciesAge / ageVolSprich$nodeSpRichness)
+
+summary(
+  lm(nicheVolume ~ divesificationRate, data = ageVolSprich)
+)
