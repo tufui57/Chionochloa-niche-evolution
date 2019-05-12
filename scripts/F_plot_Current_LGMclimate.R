@@ -1,5 +1,36 @@
+################################################################
+### Maps of the current and LGM bioclim
+################################################################
+
+################################################################
+### Load NZ outlines
+################################################################
+
+# Reference raster
+ref <- raster(paste("Y:\\GIS map and Climate data\\current_landcover", reso, "km.bil", sep = ""))
+
+# the current outline of NZ
+path = "Y:\\GIS map and Climate data\\lds-nz-coastlines-and-islands-polygons-topo-150k-SHP\\nz-coastlines-and-islands-polygons-topo-150k.shp"
+LAYERS <- ogrListLayers(path)
+nzland <- readOGR(path, LAYERS)
+# Crop extent of polygon
+nzland2 <- crop(nzland, ref)
+
+################################################################
+### Data preparation
+################################################################
+
 # Load LGM climate data
 load(".//LGMclimate.data")
+
+# Load current climate data
+alld <- read.csv("Y:\\Chionochloa_bioclim_landcover_history_worldclim1_1km.csv")
+
+d <- alld[is.na(alld$bioclim1) == F, ]
+### Extract coordinates and cliamte to plot
+d2 <- d[, c("x", "y", "bioclim1", "bioclim6", "bioclim12", "bioclim15")]
+### BIOCLIM temperature is actual values x 10 °C
+d2$bioclim1 <- d2$bioclim1 * 0.1
 
 
 map_plot <- function(data, # data for map
@@ -29,24 +60,19 @@ map_plot <- function(data, # data for map
   
 }
 
-################ Annual mean temperature
-# Load current climate data
-alld <- read.csv("Y:\\Chionochloa_bioclim_landcover_history_worldclim1_1km.csv")
-d <- alld[is.na(alld$bioclim1) == F, ]
-### Extract coordinates and cliamte to plot
-d2 <- d[, c("x", "y", "bioclim1", "bioclim6", "bioclim12", "bioclim16")]
-### BIOCLIM temperature is actual values x 10 °C
-d2$bioclim1 <- d2$bioclim1 * 0.1
+################################################################
+### Map of Annual mean temperature
+################################################################
+
 ### Convert raster to dataframe for plotting with ggplot
 rasd <- data.frame(cbind(coordinates(lgm.mainland[[1]]), values(lgm.mainland[[1]])* 0.1))
 colnames(rasd)[3] <- "bioclim1"
+
 # vector of colour anmes c(low.colour, high.colour) 
-cols = c("blue","white",  "red")
+cols = c("blue", "white", "red")
 
-### Plot
-bi1_lgm <- map_plot(rasd, "bioclim1")
-
-bi1_lgm <- bi1_lgm + 
+### Plot the LGM map
+bi1_lgm <- map_plot(rasd, "bioclim1") + 
   scale_fill_gradient2("(°C)", low = cols[1], mid = cols[2], high = cols[3],
                        na.value = "white",
                        limits = c(-3, 17)
@@ -54,10 +80,11 @@ bi1_lgm <- bi1_lgm +
 
 
 
-### Plot
-bi1_p <- map_plot(d2[, c("x", "y", "bioclim1")], "bioclim1")
-
-bi1_p <- bi1_p + 
+### Plot current map
+bi1_p <- map_plot(d2[, c("x", "y", "bioclim1")], "bioclim1") + 
+  # Current NZ outline
+  geom_polygon(data = nzland2, aes(x = long, y = lat, group = group), colour = "gray50", fill = NA) +
+  
   scale_fill_gradient2("(°C)", low = cols[1], mid = cols[2], high = cols[3],
                       na.value = "white",
                       limits = c(-3, 17)
@@ -65,11 +92,51 @@ bi1_p <- bi1_p +
 
 
 png(paste("Y://bio1.png", sep=""), width = 1200, height = 600)
-grid.arrange(bi1_lgm, bi1_p, top = title1, ncol = 2, widths = c(1,1))
+grid.arrange(bi1_lgm, bi1_p, top = "Annual mean temperature", ncol = 2, widths = c(1,1))
 dev.off()
 
+################################################################
+### Map of min temperature of the coldest month
+################################################################
+### Convert raster to dataframe for plotting with ggplot
+rasd <- data.frame(cbind(coordinates(lgm.mainland[[2]]), values(lgm.mainland[[2]])* 0.1))
+colnames(rasd)[3] <- "bioclim6"
 
-################ Annual precipitation
+# Set the climate range
+min(rasd$bioclim6, na.rm = T)
+max(rasd$bioclim6, na.rm = T)
+
+min(d2$bioclim6, na.rm = T)
+max(d2$bioclim6, na.rm = T)
+
+# vector of colour anmes c(low.colour, high.colour) 
+cols = c("blue", "white", "red")
+
+### Plot the LGM map
+bi6_lgm <- map_plot(rasd, "bioclim6") + 
+  scale_fill_gradient2("(°C)", low = cols[1], mid = cols[2], high = cols[3],
+                       na.value = "white",
+                       limits = c(-13, 10)
+  )
+
+### Plot current map
+bi6_p <- map_plot(d2[, c("x", "y", "bioclim6")], "bioclim6") + 
+  # Current NZ outline
+  geom_polygon(data = nzland2, aes(x = long, y = lat, group = group), colour = "gray50", fill = NA) +
+  
+  scale_fill_gradient2("(°C)", low = cols[1], mid = cols[2], high = cols[3],
+                       na.value = "white",
+                       limits = c(-13, 10)
+  )
+
+
+png(paste("Y://bio6.png", sep=""), width = 1200, height = 600)
+grid.arrange(bi6_lgm, bi6_p, top = "Minimum temperature in the coldest month", ncol = 2, widths = c(1,1))
+dev.off()
+
+################################################################
+### Map of Annual precipitation
+################################################################
 
 ### Convert raster to dataframe for plotting with ggplot
 rasd <- data.frame(cbind(coordinates(lgm.mainland[[3]]), values(lgm.mainland[[3]])* 0.1))
@@ -78,24 +145,25 @@ colnames(rasd)[3] <- "bioclim12"
 min(rasd$bioclim12, na.rm = T)
 max(rasd$bioclim12, na.rm = T)
 
+# vector of colour names c(low.colour, high.colour) 
+cols = c("green", "blue")
 
-# Plot
-bi12_lgm <- map_plot(rasd, "bioclim12")
+# Plot the LGM map
 
-# vector of colour anmes c(low.colour, high.colour) 
-cols = c("blue", "red")
-bi12_lgm <- bi12_lgm + 
+bi12_lgm <- map_plot(rasd, "bioclim12") +
   scale_fill_gradient("(mm)", low = cols[1], high = cols[2],
                        na.value = "white",
                        limits = c(30, 6000)
   )
 
-
 min(d2$bioclim12, na.rm = T)
 max(d2$bioclim12, na.rm = T)
-### Plot
-bi12_p <- map_plot(d2[, c("x", "y", "bioclim12")], "bioclim12")
-bi12_p <- bi12_p + 
+
+# Plot the current map
+bi12_p <- map_plot(d2[, c("x", "y", "bioclim12")], "bioclim12") + 
+  # Current NZ outline
+  geom_polygon(data = nzland2, aes(x = long, y = lat, group = group), colour = "gray50", fill = NA) +
+  
   scale_fill_gradient("(mm)", low = cols[1], high = cols[2],
                        na.value = "white",
                        limits = c(30, 6000)
@@ -103,4 +171,43 @@ bi12_p <- bi12_p +
 
 png(paste("Y://bio12.png", sep=""), width = 1200, height = 600)
 grid.arrange(bi12_lgm, bi12_p, top = "Annual precipitation", ncol = 2, widths = c(1,1))
+dev.off()
+
+################################################################
+### Map of Annual precipitation
+################################################################
+
+### Convert raster to dataframe for plotting with ggplot
+rasd <- data.frame(cbind(coordinates(lgm.mainland[[4]]), values(lgm.mainland[[4]])))
+colnames(rasd)[3] <- "bioclim15"
+
+min(rasd$bioclim15, na.rm = T)
+max(rasd$bioclim15, na.rm = T)
+
+min(d2$bioclim15, na.rm = T)
+max(d2$bioclim15, na.rm = T)
+
+# vector of colour names c(low.colour, high.colour) 
+cols = c("green", "blue")
+
+# Plot the LGM map
+
+bi15_lgm <- map_plot(rasd, "bioclim15") +
+  scale_fill_gradient("", low = cols[1], high = cols[2],
+                      na.value = "white",
+                      limits = c(7, 33)
+  )
+
+# Plot the current map
+bi15_p <- map_plot(d2[, c("x", "y", "bioclim15")], "bioclim15") + 
+  # Current NZ outline
+  geom_polygon(data = nzland2, aes(x = long, y = lat, group = group), colour = "gray50", fill = NA) +
+  
+  scale_fill_gradient("", low = cols[1], high = cols[2],
+                      na.value = "white",
+                      limits = c(7, 33)
+  )
+
+png(paste("Y://bio15.png", sep=""), width = 1200, height = 600)
+grid.arrange(bi15_lgm, bi15_p, top = "Precipitation seasonarity", ncol = 2, widths = c(1,1))
 dev.off()
