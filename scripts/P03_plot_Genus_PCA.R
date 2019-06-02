@@ -4,6 +4,7 @@
 
 library(ggplot2)
 library(gridExtra)
+library(grid)
 source(".//functions//F_plot_PCA.r")
 genus_name <- "Chionochloa"
 
@@ -17,15 +18,11 @@ source("Y:\\1st chapter_Acaena project\\Acaena manuscript\\scripts\\03_2_functio
 source("Y:\\1st chapter_Acaena project\\Acaena manuscript\\scripts\\F05_EnvSpaceWithHist.r")
 
 ### Data import
-if(genus_name == "Acaena"){
-  da1 <- read.csv("Y:\\1st chapter_Acaena project\\Acaena manuscript\\meta data\\Acaena_bioclim_landcover_history_worldclim1_1km18sep.csv")
-  
-}else{
-  da1 <- read.csv("Y:\\2nd chapter_phylogentic niche conservation\\meta data\\Chionochloa_bioclim_landcover_history_worldclim1_1km.csv"
-  )
-}
+load(
+  paste(".\\Scores_", genus_name,"_landcover_worldclim1_5km.data", sep = "")
+)
 
-d <- da1[is.na(da1$landCoverChange) == F, ]
+d <- scores[is.na(scores$landCoverChange) == F, ]
 
 # Species names
 sname <- colnames(d)[grepl(paste("^", genus_name, sep=""), colnames(d))]
@@ -59,21 +56,24 @@ scores.genus2 <- scores[(scores.genus >= 1),]
 # Plot PCA
 ###################################################
 
-pMain <- PCAplot(scores, scores.genus2, col = "blue", extent_x, extent_y) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black")
+pMain <- PCAplot(scores, scores.genus2, col = "blue", extent_x, extent_y, text.size = 30) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")
+        
         )
 
 niche <- PCA_withHist(scores.genus2, spname = genus_name,
                       histColour = "blue", pMain = pMain,
-             save = F)
+                      text.size = 30, save = F)
 
 ##################################################
 # Plot maps
 ###################################################
 
 # Reference raster
-ref <- raster(paste("Y:\\GIS map and Climate data\\current_landcover1km.bil", sep = ""))
+ref <- raster(paste("Y:\\GIS map and Climate data\\current_landcover5km.bil", sep = ""))
 
 # Outline of NZ
 path = "Y:\\GIS map and Climate data\\lds-nz-coastlines-and-islands-polygons-topo-150k-SHP\\nz-coastlines-and-islands-polygons-topo-150k.shp"
@@ -100,8 +100,6 @@ map_plot <- function(data # data for map
     
     geom_point(data = data, aes_string(x = "x", y = "y"), color = "blue", alpha = 0.1) +
     
-    ggtitle(paste("N =", nrow(data))) +
-    
     guides(colour = guide_legend(override.aes = list(size = 5, shape = 16, alpha=0.7))) +
     
     labs(x="", y="") +
@@ -124,12 +122,11 @@ map_plot <- function(data # data for map
 
 ##################################################
 # Plot in multiple panels
-###################################################
+##################################################
 pMain <- grid.arrange(niche[[2]], niche[[4]], niche[[1]], niche[[3]],
                           ncol = 2, nrow = 2, widths = c(3, 1), heights = c(1, 3))
 pMap <- map_plot(scores.genus2)
 title <- textGrob(genus_name, gp=gpar(fontface="bold", cex=1.75))
-
 
 png(paste("Y://", genus_name, ".png", sep=""), width = 1200, height = 650)
 grid.arrange(pMap, pMain, top = title, ncol = 2, widths = c(3,5))

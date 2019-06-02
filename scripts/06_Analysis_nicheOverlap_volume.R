@@ -15,7 +15,6 @@ source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 ageVolData <- read.csv(paste("Y://NicheVolume_age_", genus_tag, ".csv", sep = ""))
 overlapPdData <- read.csv(paste("Y://Nicheovrlap_PD_", genus_tag, ".csv", sep = ""))
 
-
 ##############################################################################
 ### Count species richness within clades
 ##############################################################################
@@ -29,30 +28,6 @@ ageVolSprich <- mutate(ageVolData, nodeSpRichness = nodeSp[names(nodeSp) %in% ag
 #################################################################################
 ### Linear regression
 #################################################################################
-
-# ##################################################
-# ### Species age - Niche volume
-# ##################################################
-# 
-# summary(
-#   lm(nicheVolume ~ speciesAge + nodeSpRichness, data = ageVolSprich)
-# )
-# 
-# myplot <- plotAnalysis(data = ageVolSprich, 
-#                        xv = "speciesAge", yv = "nicheVolume", 
-#                        nodeNumbercol = "nodeID", showStats = T,
-#                        xlabname = "Taxon age", 
-#                        ylabname = "Taxon niche volume",
-#                        label.point = TRUE,
-#                        genus_name = genus_name
-# ) +
-#   ylim(0, 1)
-# 
-# # save
-# ggsave(paste("Y:\\taxonVol_taxonAge_", genus_tag, ".png", sep = ""), plot = myplot,
-#        width = 300, height = 210, units = 'mm')
-# 
-# rm(myplot)
 
 #########################################################################
 ### Sister species pairs' divergence time ~ niche overlap
@@ -91,9 +66,12 @@ rm(myplot)
 #########################################################################
 
 # If the "cladePairData_5km" data was absent, run the following script again.
-source("C:\\Users\\nomur\\Documents\\Chionochloa niche evolution\\scripts\\04_Random_species_nicheOverlap.R")
+if(file.exists(paste(".//Random_sp_pair_nicheOverlap_", genus_name, ".csv", sep=""))){
+  ran <- read.csv(paste(".//Random_sp_pair_nicheOverlap_", genus_name, ".csv", sep=""))
+}else{
+  source("C:\\Users\\nomur\\Documents\\Chionochloa niche evolution\\scripts\\04_Random_species_nicheOverlap.R")
 
-ran <- read.csv(paste(".//Random_sp_pair_nicheOverlap_", genus_name, ".csv", sep=""))
+}
 
 png(paste(".//NicheOverlap_sister_random_species_", genus_name, ".png", sep=""))
 boxplot(sisOverlapPd[, 4], ran[,4],

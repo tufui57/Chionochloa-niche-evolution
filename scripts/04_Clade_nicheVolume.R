@@ -1,15 +1,16 @@
+###################################################
+### Calculate sepcies/clade niche volume
+###################################################
 
-genus_name <- "Acaena"
-genus_tag <- "acaena"
+genus_name <- "Chionochloa"
 
 source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 
 # Load PCA data and clade paired PCA data
+load(paste(".//cladePairData_5km_", genus_tag,".data", sep = ""))
 load(
-  paste(".\\Scores_", genus_name,"_landcover_worldclim1_1km.data", sep = "")
+  paste(".\\Scores_", genus_name,"_landcover_worldclim1_5km.data", sep = "")
 )
-load(paste(".//cladePairData_", genus_tag,".data", sep = ""))
-
 
 ###################################################
 ### Clade niche volume
@@ -33,7 +34,7 @@ naNodes <- sapply(1:max(tree$edge), function(i){
 }
 )
 
-### Calculate nihce volume
+### Calculate species and clade niche volume
 nichevol <- list()
 
 for(i in (1:max(tree$edge))[-unlist(naNodes)]){
@@ -79,5 +80,5 @@ nichevoldata <- nichevoldata %>%
 
 colnames(nichevoldata)[1:4] <- c("ecospat.corrected.D", "ecospat.corrected.I", "ecospat.uncorrected.D", "ecospat.uncorrected.I")
 
-write.csv(nichevoldata, paste(".//clade_nicheVolume_", genus_tag, ".csv", sep = ""))
+write.csv(nichevoldata, paste(".//clade_nicheVolume_5km_", genus_tag, ".csv", sep = ""))
 

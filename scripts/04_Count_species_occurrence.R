@@ -7,7 +7,7 @@ library(dplyr)
 genus_name <- "Acaena"
 
 #########################################################
-## Count number of 1km occurrence cells
+## Count number of 5km occurrence cells
 #########################################################
 
 # Data import
@@ -36,10 +36,37 @@ occ <- lapply(spname, function(x){
 })
 
 reslist <- data.frame(spname, unlist(occ))
-colnames(reslist)[2] <- "NumberOfGridCell"
+colnames(reslist)[2] <- "1kmGridCell"
 
 #########################################################
-## Count number of occurrence records
+## Count number of 5km occurrence cells
+#########################################################
+
+# Data import
+alld <- read.csv(paste("Y:\\", genus_name, "_bioclim_landcover_history_worldclim1_5km.csv", sep = ""))
+d <- alld[is.na(alld$bioclim1) == F, ]
+
+# Replace NA with 0
+for(i in spname){
+  d[is.na(d[,i]),i] <- 0
+}
+
+# Species with < 5 records can't be used in this analysis.
+spLessThan5 <- sapply(spname, 
+                      function(i){sum(d[,i]) < 5}
+)
+spname <- spname[!(spLessThan5)]
+
+### Count number of 1km occurrence cells
+occ <- lapply(spname, function(x){
+  sum(d[,x] == 1) %>% return
+})
+
+# Add species name codes
+reslist <- mutate(reslist, "5kmGridCell" = unlist(occ))
+
+#########################################################
+## Count number of occurrence points
 #########################################################
 
 # Data import

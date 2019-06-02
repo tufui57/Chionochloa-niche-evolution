@@ -34,10 +34,7 @@ if(genus_name == "Chionochloa"){
   sispairs <- sislist[!duppair, ]
   # Omit no occurrence record species
   sispairs <- sispairs[-c(1,8), ]
-  
-  # Load PCA data and clade paired PCA data
-  load(".//Scores_chion.data")
-  load(".//cladePairData_chion.data")
+
 }
 
 if(genus_name == "Acaena"){
@@ -53,13 +50,12 @@ if(genus_name == "Acaena"){
   sispairs <- sislist[!duppair, ]
   # Omit no occurrence record species
   sispairs <- sispairs[-c(5,6), ]
-  
-  # Load PCA data and clade paired PCA data
-  load(".//Scores_acaena.data")
-  load(".//cladePairData_acaena.data")
-  
-  
+
+
 }
+
+### Load PCA data
+load(paste(".//Scores_", genus_name, "_landcover_worldclim1_5km.data", sep = ""))
 
 ### Load clade pair data
 source(".//Chionochloa niche evolution//06_Clade_pairing.R")
@@ -72,4 +68,3 @@ extent_y = c(min(scores$PC2), max(scores$PC2))
 ### Make species name codes
 spname <- grepl(genus_name, colnames(scores)) %>% colnames(scores)[.]
 codes <- makeTag_separate(spname, genus_name, "_")
-

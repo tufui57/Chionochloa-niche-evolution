@@ -17,8 +17,6 @@ library(rgdal)
 library(rgeos)
 source(".//functions//F_plotAnalysis_clade_niche.R")
 
-genus_name = "Chionochloa"
-
 # Resolution of geographical grid cells
 reso = 5
 
@@ -40,16 +38,35 @@ if(genus_name == "Acaena"){
   genus_tag <- "acaena"
 }
 
+
 # Load current PCA scores with land cover change history
-load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
+if(file.exists(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
            Worldclim, "_", reso, "km.data", sep = ""
+))){
+  load(paste(".\\Scores_", genus_tag,"_landcover_worldclim",
+             Worldclim, "_", reso, "km.data", sep = ""
+  )
 )
-)
+}else{
+  source(".\\Chionochloa niche evolution\\scripts\\LGM climate niche\\02_Create_PCAscores.R")
+  
+}
+
+
 
 # Load LGM PCA scores
-load(paste(".\\LGM_mainisland_worldclim",
-           Worldclim, "_", reso, "km_scores.data", sep = "")
-)
+if(file.exists(paste(".\\LGM_mainisland_worldclim",
+                     Worldclim, "_", reso, "km_scores.data", sep = "")
+               )
+   ){
+  load(paste(".\\LGM_mainisland_worldclim",
+             Worldclim, "_", reso, "km_scores.data", sep = "")
+  )
+}else{
+  source(".\\Chionochloa niche evolution\\scripts\\01_Calculate_pastPCAscores.R")
+  
+}
+
 
 #################################################################################
 ### Calculate climate similarity levels
@@ -63,12 +80,10 @@ scores$cellID <- 1:nrow(scores)
 
 for(i in a){
   # Load past PCA scores with the LGM neighbourhood data
-  load(paste("Y://3rd chpater_niche filling//meta data//Assessment of climate persistence//currentNicheSimilarToLGM_", 
-           i, "_chion_",reso, "km.data", sep = ""))
+  neighbours <- read.csv(paste("Y://currentNicheSimilarToLGM_", i, "_5km.csv", sep = ""))
   
   # Add availability of climate niche in LGM to current PCA scores
   scores[, paste("lgm", i, sep="")] <- ifelse(scores$cellID %in% neighbours$dat2cellID, 1, 0)
-  
 }
 
 # Primary open habtat

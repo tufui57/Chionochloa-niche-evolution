@@ -54,15 +54,3 @@ if(genus_name == "Acaena"){
   
 }
 
-### Load clade pair data
-source(".//Chionochloa niche evolution//F01_Clade_pairing.R")
-
-# ### Extent of axes for plotting
-# extent_x = c(min(scores$PC1), max(scores$PC1))
-# extent_y = c(min(scores$PC2), max(scores$PC2))
-# 
-# 
-# ### Make species name codes
-# spname <- grepl(genus_name, colnames(scores)) %>% colnames(scores)[.]
-# codes <- makeTag_separate(spname, genus_name, "_")
-

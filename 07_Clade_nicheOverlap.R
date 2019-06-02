@@ -1,5 +1,5 @@
 ###################################################
-### Clade niche overlap/volume
+### Sister species niche overlap/volume
 ###################################################
 
 genus_name <- "Chionochloa"
