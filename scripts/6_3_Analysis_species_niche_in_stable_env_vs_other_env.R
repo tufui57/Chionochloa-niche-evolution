@@ -31,9 +31,14 @@ stableniche <- function(genus_name){
 genus_name = "Acaena"
 source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 sppersA <- stableniche("Acaena")
+
+t.test(sppersA$D, sppersA$nicheInUnstableEnv)
+
 genus_name = "Chionochloa"
 source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 sppersC <- stableniche("Chionochloa")
+
+t.test(sppersC$D, sppersC$nicheInUnstableEnv)
 
 ####################################################################################################
 ### Plot

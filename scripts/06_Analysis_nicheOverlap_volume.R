@@ -73,6 +73,8 @@ if(file.exists(paste(".//Random_sp_pair_nicheOverlap_", genus_name, ".csv", sep=
 
 }
 
+t.test(sisOverlapPd[, 4], ran[,4])
+
 png(paste(".//NicheOverlap_sister_random_species_", genus_name, ".png", sep=""))
 boxplot(sisOverlapPd[, 4], ran[,4],
         main = genus_name,
