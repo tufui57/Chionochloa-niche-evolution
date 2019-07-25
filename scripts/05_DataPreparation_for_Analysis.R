@@ -54,10 +54,15 @@ if(file.exists(paste(".//clade_schoennerD_5km_", genus_tag, ".csv", sep = ""))){
 }
 
 # Phylogenetic distances
-dis <- data.frame(distance2)
+dis <- data.frame(dist.nodes(tree))
 
-overlapPdData <- cbind(overlap, dis[dis$node %in% overlap$node1, ]) %>% 
-  .[ ,c("node1", "node2", "ecospat.corrected.D", "distance")]
+# Get distances between sister node
+dis.sister.node <- sapply(1:nrow(overlap), function(i){
+  dis[overlap[i,"node1"], overlap[i,"node2"]]
+  }
+       )
+
+overlapPdData <- cbind(overlap[ ,c("node1", "node2", "ecospat.corrected.D")], dis.sister.node)
 
 colnames(overlapPdData)[3:4] <- c("nicheOverlap", "phyloDistance")
 
@@ -77,13 +82,6 @@ node2name <- sapply(overlapPdData$node2, get_spname_from_nodeID, tree) %>%
 # Add species names
 overlapPdData <- mutate(overlapPdData, node1name = node1name) %>% 
   mutate(., node2name = node2name)
-
-# Show sister species list
-for(i in overlapPdData$node1){
-  print(i)
-  print(rownames(nodes)[allnodesister[[i]]])
-}
-
 
 ###################################################
 ### Add divergence time

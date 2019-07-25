@@ -40,5 +40,8 @@ string <- paste("bi1", ext, "$|", sep = "") %>% paste(., sep = "", collapse = ""
 rasters <- raster(paste(pathbio, files[grepl(string, files)], sep = "\\"))
 
 png("temp_worldmap_LGM.png")
-plot(rasters)
+plot(rasters, xlab="Longitude", ylab="Latitude", 
+     legend.args = list(text = expression(degree~C))
+     )
+
 dev.off()

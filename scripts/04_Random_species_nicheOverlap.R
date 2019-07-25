@@ -6,8 +6,6 @@
 ### Data preparation
 ##############################################################################
 
-# genus_name <-"Chionochloa"
-
 source(".//Chionochloa niche evolution//scripts//03_DataPreparation.R")
 
 # Load PCA scores
