@@ -167,6 +167,7 @@ points(sppersC$nicheVolume, sppersC$D/sppersC$nicheVolume, col="red")
 legend("bottomright", legend=c("Acaena", "Chionochloa"),
        col=c("black", "red"), pch=c(1,1))
 
+# Add spline curves
 smoothingSpline = smooth.spline(sppersA$nicheVolume, sppersA$D/sppersA$nicheVolume, spar=0.35)
 lines(smoothingSpline)
 smoothingSpline = smooth.spline(sppersC$nicheVolume, sppersC$D/sppersC$nicheVolume, spar=0.35)
@@ -183,6 +184,7 @@ points(rangeC$X5kmGridCell, sppersC$D/sppersC$nicheVolume, col="red")
 legend("bottomright", legend=c("Acaena", "Chionochloa"),
        col=c("black", "red"), pch=c(1,1))
 
+# Add spline curves
 smoothingSpline = smooth.spline(rangeA$X5kmGridCell, sppersA$D/sppersA$nicheVolume, spar=0.35)
 lines(smoothingSpline)
 smoothingSpline = smooth.spline(rangeC$X5kmGridCell, sppersC$D/sppersC$nicheVolume, spar=0.35)
