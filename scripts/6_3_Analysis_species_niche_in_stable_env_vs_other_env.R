@@ -192,3 +192,28 @@ lines(smoothingSpline, col="red")
 dev.off()
 
 
+
+
+
+
+
+
+##################################
+# GAM
+##################################
+
+library(mgcv)
+
+dat <- data.frame(prop = sppersA$D/sppersA$nicheVolume, nicheVolume = sppersA$nicheVolume)
+
+gamline <- gam(prop ~ s(nicheVolume), data=dat)
+
+gam.pred <- predict(gamline, dat)
+
+# Too few points to draw smooth GAM lines
+plot(dat$nicheVolume, dat$prop)
+lines(gam.pred ~ as.matrix(dat$nicheVolume))
+                                
+                                
+                                
+                                
